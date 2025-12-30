@@ -13,4 +13,4 @@ export const envSchema = z.object({
   APP_ID: z.string().default("dot-compliance-app"),
 })
 
-export const env = envSchema.parse(process.env.env) || envSchema.parse(process.env)
+export const env = envSchema.parse(process.env)
