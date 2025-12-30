@@ -1,18 +1,13 @@
 {
   "name": "api",
   "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
   "scripts": {
-    "dev": "nodemon --exec ts-node --files -r tsconfig-paths/register src/app.ts",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc",
-    "start": "node dist/src/app.js",
-    "seed": "ts-node -r tsconfig-paths/register src/scripts/seed.ts",
-    "fix-admin": "ts-node -r tsconfig-paths/register src/scripts/fix-admin.ts",
-    "ensure-admin": "ts-node -r tsconfig-paths/register src/scripts/ensure-admin-user.ts",
-    "cleardb": "ts-node -r tsconfig-paths/register src/scripts/clearDB.ts",
-    "setup:dev": "pnpm run ensure-admin && pnpm run seed",
-    "token:get": "ts-node -r tsconfig-paths/register src/scripts/generateToken.ts",
-    "test": "vitest run --dir src",
-    "prepare": "husky"
+    "start": "node dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",

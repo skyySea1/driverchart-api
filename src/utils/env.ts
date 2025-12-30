@@ -6,7 +6,7 @@ dotenv.config();
 export const envSchema = z.object({
   PORT: z.string().default("3000"),
   JWT_SECRET: z.string(),
-  APP_URL: z.url().default("https://chartersafe-90b36.web.app"),
+  APP_URL: z.url(),
   NODE_ENVIRONMENT: z
     .enum(["development", "production", "preview", "test"])
     .default("development"),

@@ -1,14 +1,27 @@
+<<<<<<< HEAD
 import { db, auth } from "./firebaseService";
 import { UserSchema, type User } from "../schemas/usersSchema";
 import { env } from "../utils/env";
 
 const COLLECTION_ID = env.COLLECTION_ID;
 const COLLECTION_PATH = `artifacts/${COLLECTION_ID}/public/data/users`;
+=======
+import { db, auth } from "../utils/firebase";
+import { UserSchema, type User } from "../schemas/usersSchema";
+import { env } from "../utils/env";
+
+const APP_ID = env.APP_ID;
+const COLLECTION_PATH = `artifacts/${APP_ID}/public/data/users`;
+
+// added schema parsing to ensure data integrity and validation
+// todo add error handling for create and update operations
+>>>>>>> 505d436 (new api)
 
 export const userService = {
   async getAll(): Promise<User[]> {
     if (!COLLECTION_PATH) throw new Error("Invalid collection path");
     const snapshot = await db.collection(COLLECTION_PATH).get();
+<<<<<<< HEAD
     const users: User[] = [];
     snapshot.forEach((doc) => {
       try {
@@ -25,6 +38,11 @@ export const userService = {
     const doc = await db.collection(COLLECTION_PATH).doc(uid).get();
     if (!doc.exists) return null;
     return UserSchema.parse({ id: doc.id, ...doc.data() });
+=======
+    return snapshot.docs.map((doc) =>
+      UserSchema.parse({ id: doc.id, ...doc.data() })
+    );
+>>>>>>> 505d436 (new api)
   },
 
   async getById(id: string): Promise<User | null> {
@@ -50,6 +68,7 @@ export const userService = {
   async createUser(data: User): Promise<string> {
     if (!data) throw new Error("Invalid user data");
     const validatedData = UserSchema.parse(data);
+<<<<<<< HEAD
 
     // 1. Create in Firebase Auth
     if (!validatedData.password) {
@@ -121,6 +140,13 @@ export const userService = {
 
     // 2. Delete from Firestore
     await db.collection(COLLECTION_PATH).doc(id).delete();
+=======
+    const docRef = await db.collection(COLLECTION_PATH).add({
+      ...validatedData,
+      createdAt: new Date().toISOString(),
+    });
+    return docRef.id;
+>>>>>>> 505d436 (new api)
   },
 
   async setUserRole(uid: string, role: string): Promise<void> {
@@ -133,6 +159,7 @@ export const userService = {
     // We try to find the document by ID (assuming ID matches UID)
     const docRef = db.collection(COLLECTION_PATH).doc(uid);
     const doc = await docRef.get();
+<<<<<<< HEAD
 
     if (doc.exists) {
       await docRef.update({ role, updatedAt: new Date().toISOString() });
@@ -140,6 +167,13 @@ export const userService = {
       console.warn(
         `Firestore document for user ${uid} not found. Only Auth Claim set.`
       );
+=======
+    
+    if (doc.exists) {
+       await docRef.update({ role, updatedAt: new Date().toISOString() });
+    } else {
+       console.warn(`Firestore document for user ${uid} not found. Only Auth Claim set.`);
+>>>>>>> 505d436 (new api)
     }
   },
 };
