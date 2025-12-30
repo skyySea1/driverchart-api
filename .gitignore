@@ -17,6 +17,9 @@ hosting/.cache
 /firebase-*.zip
 /.firebase/
 /emulator-ui/
+/conductor
+/conductor/*
+service-account.json
 
 # Logs
 *.log
