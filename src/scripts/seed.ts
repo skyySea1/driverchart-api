@@ -1,4 +1,3 @@
-import { db } from "../utils/firebase";
 import { driverService } from "../services/driverService";
 import { vehicleService } from "../services/vehicleService";
 import { env } from "../utils/env";
