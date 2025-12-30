@@ -3,7 +3,6 @@ import { driverService } from "../services/driverService";
 import { vehicleService } from "../services/vehicleService";
 import { env } from "../utils/env";
 import dayjs from "dayjs";
-import { Driver } from '../../../vue/src/types';
 
 // Mock Data
 const drivers = [
