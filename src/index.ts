@@ -10,6 +10,7 @@ import driverRoutes from "./routes/drivers";
 import vehicleRoutes from "./routes/vehicles";
 import documentRoutes from "./routes/documents";
 import userRoutes from "./routes/users";
+import applicationRoutes from "./routes/applications";
 import expirationRoutes from "./routes/expirations";
 import infoRoute from "./routes/info";
 
@@ -32,6 +33,7 @@ export async function buildApp() {
   await fastify.register(vehicleRoutes, { prefix: "/api/vehicles" });
   await fastify.register(documentRoutes, { prefix: "/api/documents" });
   await fastify.register(userRoutes, { prefix: "/api/users" });
+  await fastify.register(applicationRoutes, { prefix: "/api/applications" });
   await fastify.register(expirationRoutes, { prefix: "/api/expiration" });
 
   // Info route
@@ -39,6 +41,11 @@ export async function buildApp() {
 
   // Health check
   fastify.get("/health", async () => {
+    return { status: "ok", timestamp: new Date().toISOString() };
+  });
+
+  // Keep root path for backwards compatibility
+  fastify.get("/", async () => {
     return { status: "ok", timestamp: new Date().toISOString() };
   });
 
