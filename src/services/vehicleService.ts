@@ -1,4 +1,4 @@
-import { db } from "../utils/firebase";
+import { db } from "./firebaseService";
 import { VehicleSchema, type Vehicle } from "../schemas/vehiclesSchema";
 import { env } from "../utils/env";
 

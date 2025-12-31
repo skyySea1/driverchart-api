@@ -1,4 +1,4 @@
-import { db, auth } from "../utils/firebase";
+import { db, auth } from "./firebaseService";
 import { UserSchema, type User } from "../schemas/usersSchema";
 import { env } from "../utils/env";
 
@@ -57,11 +57,13 @@ export const userService = {
     // We try to find the document by ID (assuming ID matches UID)
     const docRef = db.collection(COLLECTION_PATH).doc(uid);
     const doc = await docRef.get();
-    
+
     if (doc.exists) {
-       await docRef.update({ role, updatedAt: new Date().toISOString() });
+      await docRef.update({ role, updatedAt: new Date().toISOString() });
     } else {
-       console.warn(`Firestore document for user ${uid} not found. Only Auth Claim set.`);
+      console.warn(
+        `Firestore document for user ${uid} not found. Only Auth Claim set.`
+      );
     }
   },
 };

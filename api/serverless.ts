@@ -1,10 +1,13 @@
-import type { IncomingMessage, ServerResponse } from 'http';
-import { buildApp } from '../src/index';
+import type { IncomingMessage, ServerResponse } from "http";
+import { buildApp } from "../src/index";
 
 const appPromise = buildApp();
 
-export default async function handler(req: IncomingMessage, res: ServerResponse) {
+export default async function handler(
+  req: IncomingMessage,
+  res: ServerResponse
+) {
   const app = await appPromise;
   await app.ready();
-  app.server.emit('request', req, res);
+  app.server.emit("request", req, res);
 }

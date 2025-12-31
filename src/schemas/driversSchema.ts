@@ -2,7 +2,7 @@ import { z } from "zod";
 
 const ComplianceItemSchema = z.object({
   documentNumber: z.string().default(""),
-  expiryDate: z.iso.date(), // ISO string YYYY-MM-DD
+  expiryDate: z.string().optional(), // More lenient than z.iso.date()
   file: z.string().optional(), // Filename mock or URL
 });
 export const DriverSchema = z.object({
@@ -19,8 +19,8 @@ export const DriverSchema = z.object({
   state: z.string().default(""),
   zip: z.string().default(""),
   // Employment
-  hireDate: z.iso.date(),
-  terminationDate: z.iso.date().optional(),
+  hireDate: z.string().optional(),
+  terminationDate: z.string().optional(),
   hireStatus: z
     .enum(["Active", "Inactive", "Terminated", "Rehired", "On Leave"])
     .default("Active"),
@@ -51,8 +51,8 @@ export const DriverSchema = z.object({
 
   roadTest: ComplianceItemSchema.extend({
     examiner: z.string().default(""),
-    date: z.iso.date().optional(),
-    expiryDate: z.iso.date().optional(),
+    date: z.string().optional(),
+    expiryDate: z.string().optional(),
   }),
 
   emergencyContact: z.object({

@@ -1,10 +1,11 @@
 import { driverService } from "../services/driverService";
 import { vehicleService } from "../services/vehicleService";
+import { applicationService } from "../services/applicationService";
 import { env } from "../utils/env";
 import dayjs from "dayjs";
 
-// Mock Data
-const drivers = [
+// Mock Data with 'any' to bypass strict TS checks during seeding
+const drivers: any[] = [
   {
     firstName: "John",
     lastName: "Doe",
@@ -16,18 +17,23 @@ const drivers = [
     cdl: {
       documentNumber: "D12345678",
       state: "FL",
-      expiryDate: dayjs().add(2, "month").format("YYYY-MM-DD"), // Expiring soon
+      expiryDate: dayjs().add(2, "month").format("YYYY-MM-DD"),
     },
     medical: {
+      documentNumber: "MED123",
+      registry: "REG456",
       expiryDate: dayjs().add(1, "year").format("YYYY-MM-DD"),
     },
     mvr: {
-      expiryDate: dayjs().subtract(1, "day").format("YYYY-MM-DD"), // Expired
+      documentNumber: "MVR789",
+      expiryDate: dayjs().subtract(1, "day").format("YYYY-MM-DD"),
     },
     drugAlcohol: {
+      documentNumber: "DA101",
       expiryDate: dayjs().add(6, "month").format("YYYY-MM-DD"),
     },
     roadTest: {
+      documentNumber: "RT202",
       examiner: "Sgt. Pepper",
       date: "2020-01-15",
     },
@@ -51,15 +57,20 @@ const drivers = [
       expiryDate: dayjs().add(3, "year").format("YYYY-MM-DD"),
     },
     medical: {
-      expiryDate: dayjs().add(2, "month").format("YYYY-MM-DD"), // Expiring soon
+      documentNumber: "MED999",
+      registry: "REG888",
+      expiryDate: dayjs().add(2, "month").format("YYYY-MM-DD"),
     },
     mvr: {
+      documentNumber: "MVR555",
       expiryDate: dayjs().add(11, "month").format("YYYY-MM-DD"),
     },
     drugAlcohol: {
+      documentNumber: "DA444",
       expiryDate: dayjs().add(1, "year").format("YYYY-MM-DD"),
     },
     roadTest: {
+      documentNumber: "RT333",
       examiner: "Officer Krupke",
       date: "2021-03-20",
     },
@@ -71,7 +82,7 @@ const drivers = [
   },
 ];
 
-const vehicles = [
+const vehicles: any[] = [
   {
     busNumber: "BUS-101",
     vin: "1HGCM82633A004352",
@@ -83,8 +94,31 @@ const vehicles = [
     busNumber: "BUS-102",
     vin: "1M8GDM9A_KP042788",
     vehicleStatus: "Maintenance",
-    lastAnnualInspection: dayjs().subtract(11, "month").format("YYYY-MM-DD"), // Due soon
+    lastAnnualInspection: dayjs().subtract(11, "month").format("YYYY-MM-DD"),
     mileage: 89000,
+  },
+];
+
+const applications: any[] = [
+  {
+    firstName: "Michael",
+    lastName: "Jordan",
+    email: "mj@bulls.com",
+    phone: "555-2323",
+    status: "Pending",
+    appliedDate: dayjs().subtract(2, "day").format("YYYY-MM-DD"),
+    experienceYears: 10,
+    cdlNumber: "A1234567",
+  },
+  {
+    firstName: "Larry",
+    lastName: "Bird",
+    email: "lb@celtics.com",
+    phone: "555-3333",
+    status: "Approved",
+    appliedDate: dayjs().subtract(5, "day").format("YYYY-MM-DD"),
+    experienceYears: 12,
+    cdlNumber: "B7654321",
   },
 ];
 
@@ -94,16 +128,20 @@ async function seed() {
   try {
     console.log("Seeding Drivers...");
     for (const d of drivers) {
-      // Cast to any to bypass strict type checks for optional fields in seed
-      
-      await driverService.createDriver(d as any);
+      await driverService.createDriver(d);
       console.log(`Created driver: ${d.firstName} ${d.lastName}`);
     }
 
     console.log("Seeding Vehicles...");
     for (const v of vehicles) {
-      await vehicleService.createVehicle(v as any);
+      await vehicleService.createVehicle(v);
       console.log(`Created vehicle: ${v.busNumber}`);
+    }
+
+    console.log("Seeding Applications...");
+    for (const a of applications) {
+      await applicationService.create(a);
+      console.log(`Created application: ${a.firstName} ${a.lastName}`);
     }
 
     console.log("Seed completed successfully!");
