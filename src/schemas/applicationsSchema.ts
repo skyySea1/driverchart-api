@@ -7,7 +7,7 @@ export const ApplicationSchema = z.object({
   email: z.email("Invalid email address"),
   phone: z.string().min(1, "Phone number is required"),
   status: z.enum(["Pending", "Approved", "Rejected"]).default("Pending"),
-  appliedDate: z.iso.date().optional(),
+  appliedDate: z.string().optional(),
   experienceYears: z.number().optional().default(0),
   cdlNumber: z.string().optional().default(""),
   notes: z.string().optional().default(""),
