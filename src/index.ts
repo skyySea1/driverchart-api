@@ -35,8 +35,6 @@ export async function buildApp() {
   await fastify.register(userRoutes, { prefix: "/api/users" });
   await fastify.register(applicationRoutes, { prefix: "/api/applications" });
   await fastify.register(expirationRoutes, { prefix: "/api/expiration" });
-
-  // Info route
   await fastify.register(infoRoute);
 
   // Health check

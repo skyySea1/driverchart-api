@@ -20,7 +20,7 @@ export async function runExpirationCheck() {
       if (diff === 30 || diff === 7 || diff === 0) {
         // Create a log entry for the alert
         await documentService.createLog({
-          date: today.toDate(),
+          date: today.toISOString(),
           fileName: `ALERT: ${label} expiring in ${diff} days`,
           type: "Compliance Alert",
           entityName: `${d.firstName} ${d.lastName}`,
