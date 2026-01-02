@@ -1,12 +1,11 @@
 import { db } from "./firebaseService";
 import { VehicleSchema, type Vehicle } from "../schemas/vehiclesSchema";
 import { env } from "../utils/env";
+import { documentService } from "./documentService";
+import dayjs from "dayjs";
 
 const APP_ID = env.APP_ID;
 const COLLECTION_PATH = `artifacts/${APP_ID}/public/data/vehicles`;
-
-// added schema parsing to ensure data integrity and return, input validation
-// todo add error handling for create and update operations
 
 export const vehicleService = {
   async getAll(): Promise<Vehicle[]> {
@@ -39,7 +38,29 @@ export const vehicleService = {
     if (!id) throw new Error("Invalid ID");
     else if (Object.keys(data).length === 0)
       throw new Error("No data provided for update");
+    
+    // Fetch current state to compare files
+    const currentDoc = await this.getById(id);
     const validatedData = VehicleSchema.partial().parse(data);
+
+    if (currentDoc) {
+      const busName = `Bus #${currentDoc.busNumber} (VIN: ${currentDoc.vin.slice(-4)})`;
+      
+      // Log Inspection File Changes
+      if (
+        validatedData.inspectionFile && 
+        validatedData.inspectionFile !== currentDoc.inspectionFile
+      ) {
+         await documentService.createLog({
+            date: dayjs().toISOString(),
+            fileName: validatedData.inspectionFile.split('/').pop() || 'unknown-file',
+            type: 'Vehicle Inspection',
+            entityName: busName,
+            user: 'System Admin', 
+          });
+      }
+    }
+
     await db.collection(COLLECTION_PATH).doc(id).update(validatedData);
   },
 
