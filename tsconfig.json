@@ -15,7 +15,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "moduleResolution": "node16",
-    "outDir": "./dist",
+    "outDir": "./dist/src",
     "forceConsistentCasingInFileNames": true
   },
   "baseUrl": "./src",
@@ -25,9 +25,7 @@
     ]
   },
   "include": [
-    "src/**/*",
-    "api/**/*",
-    "serverless.ts"
+    "src/**/*",    
   ],
   "exclude": [
     "node_modules"
