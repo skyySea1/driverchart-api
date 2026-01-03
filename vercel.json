@@ -1,5 +1,22 @@
 {
   "rewrites": [
     { "source": "/(.*)", "destination": "/api/index" }
+  ],
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/api/health",
+      "permanent": false
+    },
+    {
+      "source": "/api",
+      "destination": "/api/health",
+      "permanent": false
+    },
+    {
+      "source": "/health",
+      "destination": "/api/health",
+      "permanent": false
+    }
   ]
 }

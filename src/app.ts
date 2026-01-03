@@ -35,14 +35,9 @@ export async function buildApp() {
   await fastify.register(userRoutes, { prefix: "/api/users" });
   await fastify.register(applicationRoutes, { prefix: "/api/applications" });
   await fastify.register(expirationRoutes, { prefix: "/api/expiration" });
-  await fastify.register(infoRoute);
+  await fastify.register(infoRoute, { prefix: "/info" });
 
-  // Health check
-  fastify.get("/health", async () => {
-    return { status: "ok", timestamp: new Date().toISOString() };
-  });
-
-  // Keep root path for backwards compatibility
+  // root path for backwards compatibility or direct access
   fastify.get("/", async () => {
     return { status: "ok", timestamp: new Date().toISOString() };
   });
