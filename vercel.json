@@ -5,17 +5,17 @@
   "redirects": [
     {
       "source": "/",
-      "destination": "/api/health",
+      "destination": "/info",
       "permanent": false
     },
     {
       "source": "/api",
-      "destination": "/api/health",
+      "destination": "/info",
       "permanent": false
     },
     {
       "source": "/health",
-      "destination": "/api/health",
+      "destination": "/info",
       "permanent": false
     }
   ]
