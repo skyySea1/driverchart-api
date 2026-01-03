@@ -30,39 +30,16 @@ Follow the prompts:
 - **Which scope?** (Select your user/team)
 - **Link to existing project?** `N` (Create a new one, e.g., `driverchart-api`)
 - **In which directory is your code located?** `./` (Current directory)
-- **Want to modify these settings?** `N` (Defaults are usually fine, but see "Build Settings" below if needed)
+- **Want to modify these settings?** `N`
 
 ### 2. Configure Environment Variables
 
 You **MUST** set the production environment variables in Vercel.
 
-**Option A: Using Vercel CLI (Recommended)**
-Run these commands in the terminal (replace values with your actual secrets):
-
-```bash
-vercel env add JWT_SECRET production
-# Enter value: your-super-secure-secret
-
-vercel env add FIREBASE_PROJECT_ID production
-# Enter value: your-project-id
-
-vercel env add FIREBASE_CLIENT_EMAIL production
-# Enter value: firebase-adminsdk-xxx@your-project.iam.gserviceaccount.com
-
-vercel env add FIREBASE_PRIVATE_KEY production
-# Enter value: -----BEGIN PRIVATE KEY-----\n... (Paste the entire key including newlines)
-# Note: Vercel handles newlines in the UI, or you can use "text" input in CLI.
-
-vercel env add APP_ID production
-# Enter value: dot-compliance-app
-```
-
-**Option B: Using Vercel Dashboard**
-
-1. Go to [Vercel Dashboard](https://vercel.com/dashboard).
-2. Select your project `driverchart-api`.
-3. Go to **Settings** > **Environment Variables**.
-4. Add the keys listed in `.env.example`.
+**Note on FIREBASE_PRIVATE_KEY:**
+To avoid newline issues, it is recommended to encode your key in Base64:
+`echo -n "YOUR_KEY" | base64 -w 0`
+Then set `FIREBASE_PRIVATE_KEY` to that Base64 string. The code handles both formats.
 
 ### 3. Deploy to Production
 
@@ -72,27 +49,23 @@ Once environment variables are set, trigger a production deployment:
 vercel --prod
 ```
 
-### 4. Verify Deployment
+## Common Issues & Troubleshooting
 
-After deployment, Vercel will provide a URL (e.g., `https://driverchart-api.vercel.app`).
+### 1. "Invalid export found in module /var/task/src/app.js"
 
-Test the health check:
+**Symptom:** Your endpoints work, but you see errors in the Vercel Build/Runtime logs.
+**Cause:** Vercel's scanner automatically identifies `.js` or `.ts` files in the root or `src/` directory and tries to treat them as independent Serverless Functions. If these files don't have a `default export` that returns a handler, Vercel throws an error.
+**Fix:**
 
-```bash
-curl https://driverchart-api.vercel.app/health
-```
+- Ensure `vercel.json` has `rewrites` pointing all traffic to `/api/index`.
+- If logs remain "noisy", rename the `src/` directory to `lib/` (and update `tsconfig` and `api/index.ts` imports). Vercel ignores the `lib/` directory when searching for functions.
 
-Test the swagger documentation:
+### 2. "ReferenceError: exports is not defined"
 
-```bash
-https://driverchart-api.vercel.app/documentation
-```
+**Cause:** You have `"type": "module"` in `package.json` but your `tsconfig.json` is generating CommonJS code (`exports/require`).
+**Fix:** Remove `"type": "module"` from `package.json` or update `tsconfig.json` to use `"module": "NodeNext"`.
 
-## Troubleshooting
+### 3. "Invalid PEM formatted message"
 
-- **Cold Starts**: Vercel Serverless Functions sleep after inactivity. The first request might take 1-2 seconds.
-- **Firebase Auth Error**: If you see "Credential implementation provided to initializeApp() via the "credential" property failed", check your `FIREBASE_PRIVATE_KEY`. It must contain the `\n` characters exactly as provided by Google, or real newlines. The current code (`serverless.ts` -> `firebaseService.ts`) handles replaced `\n` strings:
-
-    ```ts
-    privateKey: env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
-    ```
+**Cause:** The `FIREBASE_PRIVATE_KEY` is being mangled during the environment variable injection (usually missing `\n` characters).
+**Fix:** Use the Base64 encoding method mentioned in Step 2.
