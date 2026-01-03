@@ -66,7 +66,7 @@ api/
 2. Example endpoint test:
 
    ```bash
-   curl -X POST http://localhost:3000/drivers \
+   curl -X POST http://localhost:3000/api/drivers \
      -H "Content-Type: application/json" \
      -d '{"name":"John Doe","licenseNumber":"ABC123"}'
    ```
@@ -78,4 +78,3 @@ api/
 - Add complete OpenAPI / Swagger documentation
 - Expand routes for documents, alerts, users
 - Configure logger with request-id
-- Integrate Vue frontend via Axios or fetch
