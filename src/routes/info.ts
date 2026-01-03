@@ -7,7 +7,7 @@ export default async function infoRoute(fastify: FastifyInstance) {
       description: 'US DOT Compliance Management System API',
       version: '1.0.0',
       status: "ok",
-      environment: process.env.NODE_ENV || 'development',
+      environment: process.env.ENV || 'development',
       timestamp: new Date().toISOString(),
     };
   });
