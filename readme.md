@@ -78,4 +78,3 @@ api/
 - Add complete OpenAPI / Swagger documentation
 - Expand routes for documents, alerts, users
 - Configure logger with request-id
-- Integrate Vue frontend via Axios or fetch
