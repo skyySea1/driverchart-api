@@ -1,33 +1,20 @@
 {
-  "$schema": "https://www.schemastore.org/tsconfig",
-  "display": "Node 22",
-  "_version": "22.0.0",
-  "compilerOptions": {
-    "lib": [
-      "es2024",
-      "ESNext.Array",
-      "ESNext.Collection",
-      "ESNext.Iterator"
-    ],
-    "module": "nodenext",
-    "target": "es2022",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "moduleResolution": "node16",
-    "outDir": "./dist/src",
-    "forceConsistentCasingInFileNames": true
-  },
-  "baseUrl": "./src",
-  "paths": {
-    "@/*": [
-      "*"
-    ]
-  },
-  "include": [
-    "src/**/*",    
-  ],
-  "exclude": [
-    "node_modules"
-  ]
-}
+  "compilerOptions": { 
+    "baseUrl": "./src",
+    "paths": {
+      "@/*": [
+        "*"
+      ]
+    },
+    "target": "esnext",
+    "module": "CommonJS", 
+    "outDir": "./dist", 
+    "moduleResolution": "node", 
+    "esModuleInterop": true, 
+    "forceConsistentCasingInFileNames": true, 
+    "strict": true, 
+        "skipLibCheck": true
+      },
+      "include": ["src/**/*", "api/**/*"]
+    }
+    
