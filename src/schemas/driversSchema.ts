@@ -2,8 +2,8 @@ import { z } from "zod";
 
 const ComplianceItemSchema = z.object({
   documentNumber: z.string().default(""),
-  expiryDate: z.string().optional(), // More lenient than z.iso.date()
-  file: z.string().optional(), // Filename mock or URL
+  expiryDate: z.string().optional(),
+  file: z.string().optional(),
 });
 export const DriverSchema = z.object({
   id: z.string().optional(),
