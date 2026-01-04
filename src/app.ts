@@ -1,5 +1,8 @@
 import Fastify from "fastify";
-import { serializerCompiler, validatorCompiler } from "fastify-type-provider-zod";
+import {
+  serializerCompiler,
+  validatorCompiler,
+} from "fastify-type-provider-zod";
 
 import { corsPlugin } from "./plugins/corsPlugin";
 import { authPlugin } from "./plugins/authPlugin";
@@ -38,7 +41,7 @@ export async function buildApp() {
   await fastify.register(userRoutes, { prefix: "/api/users" });
   await fastify.register(applicationRoutes, { prefix: "/api/applications" });
   await fastify.register(expirationRoutes, { prefix: "/api/expiration" });
-  await fastify.register(infoRoute, { prefix: "/api" });
+  await fastify.register(infoRoute, { prefix: "/api/info" });
 
   // Health check - match /api/health
   fastify.get("/api/health", async () => {

@@ -7,16 +7,6 @@
       "source": "/",
       "destination": "/info",
       "permanent": false
-    },
-    {
-      "source": "/api",
-      "destination": "/info",
-      "permanent": false
-    },
-    {
-      "source": "/health",
-      "destination": "/info",
-      "permanent": false
     }
   ]
 }
