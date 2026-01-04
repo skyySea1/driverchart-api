@@ -10,6 +10,7 @@ export default async function (fastify: FastifyInstance) {
   server.get(
     "/logs",
     {
+      onRequest: [fastify.authenticate],
       schema: {
         description: "Get all document logs",
         tags: ["Documents"],
@@ -26,6 +27,7 @@ export default async function (fastify: FastifyInstance) {
   server.post(
     "/logs",
     {
+      onRequest: [fastify.authenticate],
       schema: {
         description: "Create a document log entry",
         tags: ["Documents"],
@@ -44,6 +46,7 @@ export default async function (fastify: FastifyInstance) {
   server.get(
     "/logs/:entityName",
     {
+      onRequest: [fastify.authenticate],
       schema: {
         description: "Get logs for a specific entity",
         tags: ["Documents"],

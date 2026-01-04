@@ -10,6 +10,7 @@ export default async function (fastify: FastifyInstance) {
   server.get(
     "/",
     {
+      onRequest: [fastify.authenticate],
       schema: {
         description: "Get all applications",
         tags: ["Applications"],
@@ -26,6 +27,7 @@ export default async function (fastify: FastifyInstance) {
   server.get(
     "/:id",
     {
+      onRequest: [fastify.authenticate],
       schema: {
         description: "Get application by ID",
         tags: ["Applications"],
@@ -45,6 +47,7 @@ export default async function (fastify: FastifyInstance) {
     }
   );
 
+  // POST remains public for driver applicants
   server.post(
     "/",
     {
@@ -82,6 +85,7 @@ export default async function (fastify: FastifyInstance) {
   server.put(
     "/:id",
     {
+      onRequest: [fastify.authenticate],
       schema: {
         description: "Update application",
         tags: ["Applications"],
@@ -106,6 +110,7 @@ export default async function (fastify: FastifyInstance) {
   server.delete(
     "/:id",
     {
+      onRequest: [fastify.authenticate],
       schema: {
         description: "Delete application",
         tags: ["Applications"],
