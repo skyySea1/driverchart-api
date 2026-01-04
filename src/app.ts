@@ -2,7 +2,7 @@ import Fastify from "fastify";
 import { serializerCompiler, validatorCompiler } from "fastify-type-provider-zod";
 
 import { corsPlugin } from "./plugins/corsPlugin";
-import { jwtPlugin } from "./plugins/jwt";
+import { authPlugin } from "./plugins/authPlugin";
 import { swaggerPlugin } from "./plugins/swagger";
 
 // Routes
@@ -25,17 +25,23 @@ export async function buildApp() {
 
   // Register Plugins
   await fastify.register(corsPlugin);
-  await fastify.register(jwtPlugin);
+  await fastify.register(authPlugin);
   await fastify.register(swaggerPlugin);
 
   // Register Routes
+  await fastify.register(authRoutes, { prefix: "/api/auth" });
   await fastify.register(driverRoutes, { prefix: "/api/drivers" });
   await fastify.register(vehicleRoutes, { prefix: "/api/vehicles" });
   await fastify.register(documentRoutes, { prefix: "/api/documents" });
   await fastify.register(userRoutes, { prefix: "/api/users" });
   await fastify.register(applicationRoutes, { prefix: "/api/applications" });
   await fastify.register(expirationRoutes, { prefix: "/api/expiration" });
-  await fastify.register(infoRoute, { prefix: "/info" });
+  await fastify.register(infoRoute, { prefix: "/api" });
+
+  // Health check - match /api/health
+  fastify.get("/api/health", async () => {
+    return { status: "ok", timestamp: new Date().toISOString() };
+  });
 
   // root path for backwards compatibility or direct access
   fastify.get("/", async () => {
