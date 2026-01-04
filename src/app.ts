@@ -64,8 +64,7 @@ async function start() {
   }
 }
 
-// Only start the server if we are NOT in a Vercel environment (or other serverless env)
-// Vercel sets 'VERCEL' env var.
-if (!process.env.VERCEL) {
+// Only start the server if we are NOT in a Vercel environment AND NOT in test environment
+if (!process.env.VERCEL && process.env.NODE_ENV !== 'test') {
   start();
 }
