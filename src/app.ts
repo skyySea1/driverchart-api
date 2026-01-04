@@ -14,6 +14,7 @@ import applicationRoutes from "./routes/applications";
 import expirationRoutes from "./routes/expirations";
 import infoRoute from "./routes/info";
 import authRoutes from "./routes/auth";
+import { env } from "./utils/env";
 
 export async function buildApp() {
   const fastify = Fastify({
@@ -55,16 +56,17 @@ export async function buildApp() {
 async function start() {
   try {
     const app = await buildApp();
-    const port = Number(process.env.PORT) || 3000;
+    const port = Number(env.PORT) || 3000;
     await app.listen({ port, host: "0.0.0.0" });
-    console.log(`Server listening on port ${port}`);
+    console.log(`\n Server listening on port ${port}`);
+    console.log(` Current environment: ${env.NODE_ENVIRONMENT}\n`);
   } catch (err) {
     console.error(err);
     process.exit(1);
   }
 }
-
-// Only start the server if we are NOT in a Vercel environment AND NOT in test environment
-if (!process.env.VERCEL && process.env.NODE_ENV !== 'test') {
+// review why api is sending self requests or maybe ping?
+// Only start if NOT in a Vercel AND NOT in test environment (external injection)
+if (!process.env.VERCEL && process.env.NODE_ENV !== "test") {
   start();
 }

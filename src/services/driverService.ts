@@ -28,12 +28,18 @@ export const driverService = {
     if (!data) throw new Error("Invalid driver data");
 
     const validatedData = DriverSchema.parse(data);
-    const docRef = await db.collection(COLLECTION_PATH).add({
+    
+    // Generate ID explicitly so we can store it in the document
+    const docRef = db.collection(COLLECTION_PATH).doc();
+    const id = docRef.id;
+
+    await docRef.set({
       ...validatedData,
+      id: id, // Store ID in the document
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
-    return docRef.id;
+    return id;
   },
 
   async updateDriver(id: string, data: Partial<Driver>): Promise<void> {
