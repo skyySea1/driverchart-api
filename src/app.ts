@@ -2,7 +2,7 @@ import Fastify from "fastify";
 import { serializerCompiler, validatorCompiler } from "fastify-type-provider-zod";
 
 import { corsPlugin } from "./plugins/corsPlugin";
-import { jwtPlugin } from "./plugins/jwt";
+import { authPlugin } from "./plugins/authPlugin";
 import { swaggerPlugin } from "./plugins/swagger";
 
 // Routes
@@ -13,6 +13,8 @@ import userRoutes from "./routes/users";
 import applicationRoutes from "./routes/applications";
 import expirationRoutes from "./routes/expirations";
 import infoRoute from "./routes/info";
+import authRoutes from "./routes/auth";
+import { env } from "./utils/env";
 
 export async function buildApp() {
   const fastify = Fastify({
@@ -25,17 +27,23 @@ export async function buildApp() {
 
   // Register Plugins
   await fastify.register(corsPlugin);
-  await fastify.register(jwtPlugin);
+  await fastify.register(authPlugin);
   await fastify.register(swaggerPlugin);
 
   // Register Routes
+  await fastify.register(authRoutes, { prefix: "/api/auth" });
   await fastify.register(driverRoutes, { prefix: "/api/drivers" });
   await fastify.register(vehicleRoutes, { prefix: "/api/vehicles" });
   await fastify.register(documentRoutes, { prefix: "/api/documents" });
   await fastify.register(userRoutes, { prefix: "/api/users" });
   await fastify.register(applicationRoutes, { prefix: "/api/applications" });
   await fastify.register(expirationRoutes, { prefix: "/api/expiration" });
-  await fastify.register(infoRoute, { prefix: "/info" });
+  await fastify.register(infoRoute, { prefix: "/api" });
+
+  // Health check - match /api/health
+  fastify.get("/api/health", async () => {
+    return { status: "ok", timestamp: new Date().toISOString() };
+  });
 
   // root path for backwards compatibility or direct access
   fastify.get("/", async () => {
@@ -48,17 +56,17 @@ export async function buildApp() {
 async function start() {
   try {
     const app = await buildApp();
-    const port = Number(process.env.PORT) || 3000;
+    const port = Number(env.PORT) || 3000;
     await app.listen({ port, host: "0.0.0.0" });
-    console.log(`Server listening on port ${port}`);
+    console.log(`\n Server listening on port ${port}`);
+    console.log(` Current environment: ${env.NODE_ENVIRONMENT}\n`);
   } catch (err) {
     console.error(err);
     process.exit(1);
   }
 }
-
-// Only start the server if we are NOT in a Vercel environment (or other serverless env)
-// Vercel sets 'VERCEL' env var.
-if (!process.env.VERCEL) {
+// review why api is sending self requests or maybe ping?
+// Only start if NOT in a Vercel AND NOT in test environment (external injection)
+if (!process.env.VERCEL && process.env.NODE_ENV !== "test") {
   start();
 }

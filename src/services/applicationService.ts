@@ -29,14 +29,18 @@ export const applicationService = {
     if (!data) throw new Error("Invalid application data");
 
     const validatedData = ApplicationSchema.parse(data);
-    const docRef = await db.collection(COLLECTION_PATH).add({
+    
+    // Generate ID explicitly
+    const docRef = db.collection(COLLECTION_PATH).doc(); // review why await is needed here
+    const id = docRef.id;
+
+    await docRef.set({
       ...validatedData,
-      appliedDate:
-        validatedData.appliedDate || new Date().toISOString().split("T")[0],
+      id: id, // Store ID in the document
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      status: "Pending",
     });
-    return docRef.id;
+    return id;
   },
 
   async update(id: string, data: Partial<Application>): Promise<void> {

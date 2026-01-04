@@ -11,6 +11,7 @@ export default async function (fastify: FastifyInstance) {
   server.get(
     "/alerts",
     {
+      onRequest: [fastify.authenticate],
       schema: {
         description: "Get all compliance alerts",
         tags: ["Expiration"],
