@@ -10,6 +10,7 @@ export default async function (fastify: FastifyInstance) {
   server.get(
     "/",
     {
+      onRequest: [fastify.authenticate],
       schema: {
         description: "Get all drivers",
         tags: ["Drivers"],
@@ -26,6 +27,7 @@ export default async function (fastify: FastifyInstance) {
   server.get(
     "/:id",
     {
+      onRequest: [fastify.authenticate],
       schema: {
         description: "Get driver by ID",
         tags: ["Drivers"],
@@ -48,6 +50,7 @@ export default async function (fastify: FastifyInstance) {
   server.post(
     "/",
     {
+      onRequest: [fastify.authenticate],
       schema: {
         description: "Create new driver",
         tags: ["Drivers"],
@@ -66,6 +69,7 @@ export default async function (fastify: FastifyInstance) {
   server.put(
     "/:id",
     {
+      onRequest: [fastify.authenticate],
       schema: {
         description: "Update driver",
         tags: ["Drivers"],
@@ -90,6 +94,7 @@ export default async function (fastify: FastifyInstance) {
   server.delete(
     "/:id",
     {
+      onRequest: [fastify.authenticate],
       schema: {
         description: "Delete driver",
         tags: ["Drivers"],

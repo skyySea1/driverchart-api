@@ -10,6 +10,7 @@ export default async function (fastify: FastifyInstance) {
   server.get(
     "/",
     {
+      onRequest: [fastify.authenticate],
       schema: {
         description: "Get all users",
         tags: ["Users"],
@@ -26,6 +27,7 @@ export default async function (fastify: FastifyInstance) {
   server.post(
     "/",
     {
+      onRequest: [fastify.authenticate],
       schema: {
         description: "Create a new user",
         tags: ["Users"],
