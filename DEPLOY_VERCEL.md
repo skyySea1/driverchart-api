@@ -41,6 +41,10 @@ To avoid newline issues, it is recommended to encode your key in Base64:
 `echo -n "YOUR_KEY" | base64 -w 0`
 Then set `FIREBASE_PRIVATE_KEY` to that Base64 string. The code handles both formats.
 
+**FIREBASE_WEB_API_KEY:** Required for the `/api/auth/login` endpoint.
+`vercel env add FIREBASE_WEB_API_KEY production`
+(Use the value from `VITE_FIREBASE_API_KEY` in `vuebus/.env`).
+
 ### 3. Deploy to Production
 
 Once environment variables are set, trigger a production deployment:

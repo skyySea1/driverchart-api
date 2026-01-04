@@ -13,6 +13,7 @@ import userRoutes from "./routes/users";
 import applicationRoutes from "./routes/applications";
 import expirationRoutes from "./routes/expirations";
 import infoRoute from "./routes/info";
+import authRoutes from "./routes/auth";
 
 export async function buildApp() {
   const fastify = Fastify({
