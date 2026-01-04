@@ -6,8 +6,9 @@
     "build": "tsc",
     "start": "node dist/src/app.js",
     "seed": "tsx src/scripts/seed.ts",
-    "generate-token": "tsx src/scripts/generateToken.ts",
-    "test": "vitest run",
+    "cleardb": "tsx src/scripts/clearDB.ts",
+    "token:get": "tsx src/scripts/generateToken.ts",
+    "test": "vitest run --dir src",
     "prepare": "husky"
   },
   "keywords": [],

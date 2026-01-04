@@ -60,7 +60,7 @@ api/
 1. Start the server:
 
    ```bash
-   pnpm ts-node src/index.ts
+   pnpm tsx src/index.ts
    ```
 
 2. Example endpoint test:
