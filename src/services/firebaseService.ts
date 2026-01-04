@@ -1,6 +1,10 @@
 import admin from "firebase-admin";
 import { env } from "../utils/env";
 
+const envInfo = process.env.VERCEL 
+  ? `Vercel (${process.env.VERCEL_ENV})` 
+  : `Local (${env.NODE_ENVIRONMENT})`;
+
 // Initialize Firebase Admin with credentials from environment variables if available
 if (!admin.apps.length) {
   try {
@@ -12,7 +16,7 @@ if (!admin.apps.length) {
       env.FIREBASE_PROJECT_ID
     ) {
       console.log(
-        "Initializing Firebase Admin with Service Account from ENV variables"
+        `Initializing Firebase Admin with Service Account from ENV variables ${envInfo}...`
       );
 
       let privateKey = env.FIREBASE_PRIVATE_KEY.replace(/^"|"$/g, "");
