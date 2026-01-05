@@ -24,7 +24,7 @@ describe('API Basic Integration Tests', () => {
   it('GET /api should return API information', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: '/api',
+      url: '/api/info',
     });
 
     expect(response.statusCode).toBe(200);

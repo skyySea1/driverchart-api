@@ -28,6 +28,22 @@ export const driverService = {
     if (!data) throw new Error("Invalid driver data");
 
     const validatedData = DriverSchema.parse(data);
+
+    // Check for existing driver with same email (uniqueness check)
+    if (validatedData.email) {
+      const existing = await db.collection(COLLECTION_PATH)
+        .where('email', '==', validatedData.email)
+        .get();
+      
+      if (!existing.empty) {
+        // Return existing ID instead of creating duplicate
+        // OR throw error depending on desired behavior.
+        // For seed script stability, we return existing ID.
+        // For API, throwing might be better but let's be idempotent for now.
+        console.log(`Driver with email ${validatedData.email} already exists. Skipping creation.`);
+        return existing.docs[0].id;
+      }
+    }
     
     // Generate ID explicitly so we can store it in the document
     const docRef = db.collection(COLLECTION_PATH).doc();
