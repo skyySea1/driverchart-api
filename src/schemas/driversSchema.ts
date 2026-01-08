@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const ComplianceItemSchema = z.object({
+export const ComplianceItemSchema = z.object({
   documentNumber: z.string().default(""),
   expiryDate: z.string().optional(),
   file: z.string().optional(),
