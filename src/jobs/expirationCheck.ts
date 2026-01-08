@@ -30,7 +30,7 @@ export async function runExpirationCheck() {
       }
     };
 
-    await checkItem(d.cdl?.expiryDate, "CDL");
+    await checkItem(d.cdl?.expiryDate, "Cdl");
     await checkItem(d.medical?.expiryDate, "Medical Certificate");
     await checkItem(d.mvr?.expiryDate, "MVR");
     await checkItem(d.drugAlcohol?.expiryDate, "Clearinghouse Query");
