@@ -13,7 +13,7 @@ export default async function (fastify: FastifyInstance) {
         description: "Login with username and password to get a Bearer token",
         tags: ["Authentication"],
         body: z.object({
-          username: z.string().email("Username must be a valid email"),
+          username: z.email("Username must be a valid email"),
           password: z.string().min(1, "Password is required"),
         }),
         response: {
