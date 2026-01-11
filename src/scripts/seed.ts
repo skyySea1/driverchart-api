@@ -4,8 +4,9 @@ import { applicationService } from "../services/applicationService";
 import { env } from "../utils/env";
 import dayjs from "dayjs";
 
-// Mock Data with 'any' to bypass strict TS checks during seeding
+// Richer Seed Data
 const drivers: any[] = [
+  // 1. Valid Driver
   {
     firstName: "John",
     lastName: "Doe",
@@ -17,7 +18,7 @@ const drivers: any[] = [
     cdl: {
       documentNumber: "D12345678",
       state: "FL",
-      expiryDate: dayjs().add(2, "month").format("YYYY-MM-DD"),
+      expiryDate: dayjs().add(2, "year").format("YYYY-MM-DD"),
     },
     medical: {
       documentNumber: "MED123",
@@ -26,7 +27,7 @@ const drivers: any[] = [
     },
     mvr: {
       documentNumber: "MVR789",
-      expiryDate: dayjs().subtract(1, "day").format("YYYY-MM-DD"),
+      expiryDate: dayjs().add(11, "month").format("YYYY-MM-DD"),
     },
     drugAlcohol: {
       documentNumber: "DA101",
@@ -43,6 +44,7 @@ const drivers: any[] = [
       relationship: "Spouse",
     },
   },
+  // 2. Expiring Soon (CDL)
   {
     firstName: "Alice",
     lastName: "Smith",
@@ -54,7 +56,7 @@ const drivers: any[] = [
     cdl: {
       documentNumber: "S98765432",
       state: "NY",
-      expiryDate: dayjs().add(3, "year").format("YYYY-MM-DD"),
+      expiryDate: dayjs().add(15, "day").format("YYYY-MM-DD"), // Expiring soon
     },
     medical: {
       documentNumber: "MED999",
@@ -80,6 +82,153 @@ const drivers: any[] = [
       relationship: "Brother",
     },
   },
+  // 3. Expired (Medical)
+  {
+    firstName: "Bob",
+    lastName: "Johnson",
+    dob: "1978-11-05",
+    phone: "555-0303",
+    email: "bob.j@example.com",
+    hireDate: "2019-06-01",
+    hireStatus: "Active",
+    cdl: {
+      documentNumber: "C11223344",
+      state: "TX",
+      expiryDate: dayjs().add(1, "year").format("YYYY-MM-DD"),
+    },
+    medical: {
+      documentNumber: "MED777",
+      registry: "REG111",
+      expiryDate: dayjs().subtract(5, "day").format("YYYY-MM-DD"), // Expired
+    },
+    mvr: {
+      documentNumber: "MVR222",
+      expiryDate: dayjs().add(1, "month").format("YYYY-MM-DD"),
+    },
+    drugAlcohol: {
+      documentNumber: "DA333",
+      expiryDate: dayjs().add(3, "month").format("YYYY-MM-DD"),
+    },
+    roadTest: {
+      documentNumber: "RT444",
+      examiner: "Capt. Hook",
+      date: "2019-06-05",
+    },
+    emergencyContact: {
+      name: "Mary Johnson",
+      phone: "555-0304",
+      relationship: "Sister",
+    },
+  },
+  // 4. Terminated Driver
+  {
+    firstName: "Charlie",
+    lastName: "Brown",
+    dob: "1992-02-14",
+    phone: "555-0404",
+    email: "charlie.b@example.com",
+    hireDate: "2022-01-01",
+    hireStatus: "Terminated",
+    terminationDate: "2023-12-31",
+    cdl: { documentNumber: "D998877", state: "CA", expiryDate: "" },
+    medical: { documentNumber: "", expiryDate: "" },
+    mvr: { documentNumber: "", expiryDate: "" },
+    drugAlcohol: { documentNumber: "", expiryDate: "" },
+    roadTest: { documentNumber: "", examiner: "", date: "" },
+    emergencyContact: { name: "", phone: "", relationship: "" },
+  },
+  // 5. New Hire (Missing Docs)
+  {
+    firstName: "Diana",
+    lastName: "Prince",
+    dob: "1995-07-07",
+    phone: "555-0505",
+    email: "diana.p@example.com",
+    hireDate: dayjs().format("YYYY-MM-DD"), // Today
+    hireStatus: "Active",
+    cdl: { documentNumber: "", state: "", expiryDate: "" },
+    medical: { documentNumber: "", expiryDate: "" },
+    mvr: { documentNumber: "", expiryDate: "" },
+    drugAlcohol: { documentNumber: "", expiryDate: "" },
+    roadTest: { documentNumber: "", examiner: "", date: "" },
+    emergencyContact: { name: "Bruce Wayne", phone: "555-0506", relationship: "Friend" },
+  },
+  // 6. Expiring Soon (Multiple)
+  {
+    firstName: "Edward",
+    lastName: "Nygma",
+    dob: "1980-10-31",
+    phone: "555-0606",
+    email: "e.nygma@example.com",
+    hireDate: "2018-04-01",
+    hireStatus: "Active",
+    cdl: {
+      documentNumber: "Q123123",
+      state: "NJ",
+      expiryDate: dayjs().add(10, "day").format("YYYY-MM-DD"), // Expiring
+    },
+    medical: {
+      documentNumber: "MED555",
+      registry: "REG222",
+      expiryDate: dayjs().add(20, "day").format("YYYY-MM-DD"), // Expiring
+    },
+    mvr: {
+      documentNumber: "MVR888",
+      expiryDate: dayjs().add(5, "day").format("YYYY-MM-DD"), // Expiring
+    },
+    drugAlcohol: {
+      documentNumber: "DA999",
+      expiryDate: dayjs().add(2, "year").format("YYYY-MM-DD"),
+    },
+    roadTest: {
+      documentNumber: "RT555",
+      examiner: "Jim Gordon",
+      date: "2018-04-05",
+    },
+    emergencyContact: {
+      name: "Oswald",
+      phone: "555-0607",
+      relationship: "Associate",
+    },
+  },
+  // 7-15: Generated Drivers
+  ...Array.from({ length: 9 }).map((_, i) => ({
+    firstName: `Driver${i + 7}`,
+    lastName: `Test`,
+    dob: "1988-01-01",
+    phone: `555-070${i}`,
+    email: `driver${i + 7}@test.com`,
+    hireDate: "2021-01-01",
+    hireStatus: "Active",
+    cdl: {
+      documentNumber: `D${1000 + i}`,
+      state: "FL",
+      expiryDate: dayjs().add(6 + i, "month").format("YYYY-MM-DD"),
+    },
+    medical: {
+      documentNumber: `M${1000 + i}`,
+      registry: `R${1000 + i}`,
+      expiryDate: dayjs().add(1, "year").format("YYYY-MM-DD"),
+    },
+    mvr: {
+      documentNumber: `V${1000 + i}`,
+      expiryDate: dayjs().add(1, "year").format("YYYY-MM-DD"),
+    },
+    drugAlcohol: {
+      documentNumber: `A${1000 + i}`,
+      expiryDate: dayjs().add(1, "year").format("YYYY-MM-DD"),
+    },
+    roadTest: {
+      documentNumber: `RT${1000 + i}`,
+      examiner: "Tester",
+      date: "2021-01-05",
+    },
+    emergencyContact: {
+      name: "Contact",
+      phone: "555-0000",
+      relationship: "None",
+    },
+  })),
 ];
 
 const vehicles: any[] = [
@@ -97,6 +246,27 @@ const vehicles: any[] = [
     lastAnnualInspection: dayjs().subtract(11, "month").format("YYYY-MM-DD"),
     mileage: 89000,
   },
+  {
+    busNumber: "BUS-103",
+    vin: "5T8GDM9A_ZZ099887",
+    vehicleStatus: "Active",
+    lastAnnualInspection: dayjs().subtract(1, "month").format("YYYY-MM-DD"),
+    mileage: 45000,
+  },
+  {
+    busNumber: "BUS-104",
+    vin: "2H4GDM9A_AA112233",
+    vehicleStatus: "Inactive",
+    lastAnnualInspection: dayjs().subtract(13, "month").format("YYYY-MM-DD"), // Expired Inspection
+    mileage: 210000,
+  },
+  {
+    busNumber: "BUS-105",
+    vin: "3N1GDM9A_BB445566",
+    vehicleStatus: "Active",
+    lastAnnualInspection: dayjs().subtract(11, "month").add(20, "day").format("YYYY-MM-DD"), // Expiring soon
+    mileage: 67000,
+  },
 ];
 
 const applications: any[] = [
@@ -109,6 +279,7 @@ const applications: any[] = [
     appliedDate: dayjs().subtract(2, "day").format("YYYY-MM-DD"),
     experienceYears: 10,
     cdlNumber: "A1234567",
+    notes: "Legendary driver.",
   },
   {
     firstName: "Larry",
@@ -119,6 +290,40 @@ const applications: any[] = [
     appliedDate: dayjs().subtract(5, "day").format("YYYY-MM-DD"),
     experienceYears: 12,
     cdlNumber: "B7654321",
+    notes: "Great awareness.",
+  },
+  {
+    firstName: "Magic",
+    lastName: "Johnson",
+    email: "magic@lakers.com",
+    phone: "555-4444",
+    status: "Rejected",
+    appliedDate: dayjs().subtract(10, "day").format("YYYY-MM-DD"),
+    experienceYears: 2,
+    cdlNumber: "C998877",
+    notes: "Not enough experience.",
+  },
+  {
+    firstName: "Shaq",
+    lastName: "O'Neal",
+    email: "shaq@lakers.com",
+    phone: "555-5555",
+    status: "Pending",
+    appliedDate: dayjs().format("YYYY-MM-DD"),
+    experienceYears: 5,
+    cdlNumber: "D556677",
+    notes: "Big presence.",
+  },
+  {
+    firstName: "Kobe",
+    lastName: "Bryant",
+    email: "kobe@lakers.com",
+    phone: "555-8248",
+    status: "Pending",
+    appliedDate: dayjs().subtract(1, "day").format("YYYY-MM-DD"),
+    experienceYears: 8,
+    cdlNumber: "E248248",
+    notes: "Mamba mentality.",
   },
 ];
 
