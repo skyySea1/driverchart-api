@@ -11,8 +11,8 @@ export const pinoConfig: LoggerOptions = {
   },
 };
 
-// Transport only in development (not in tests)
-if (!isProduction && !isTest) {
+// Transport only in development (not in tests) and not on Vercel
+if (!isProduction && !isTest && !process.env.VERCEL) {
   pinoConfig.transport = {
     target: "pino-pretty",
     options: {
