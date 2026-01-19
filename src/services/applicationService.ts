@@ -4,6 +4,7 @@ import {
   type Application,
 } from "../schemas/applicationsSchema";
 import { env } from "../utils/env";
+import { logger } from "./logger-service";
 
 const APP_ID = env.APP_ID;
 const COLLECTION_PATH = `artifacts/${APP_ID}/public/data/applications`;
@@ -12,12 +13,18 @@ export const applicationService = {
   async getAll(): Promise<Application[]> {
     if (!COLLECTION_PATH) throw new Error("Invalid collection path");
     const snapshot = await db.collection(COLLECTION_PATH).get();
-    
+
     return snapshot.docs
       .map((doc) => {
-        const result = ApplicationSchema.safeParse({ id: doc.id, ...doc.data() });
+        const result = ApplicationSchema.safeParse({
+          id: doc.id,
+          ...doc.data(),
+        });
         if (!result.success) {
-          console.warn(`[ApplicationService] Skipping invalid document ${doc.id}:`, JSON.stringify(result.error.issues));
+          logger.warn(
+            { docId: doc.id, issues: result.error.issues },
+            "[ApplicationService] Skipping invalid document"
+          );
           return null;
         }
         return result.data;
@@ -35,16 +42,19 @@ export const applicationService = {
 
   async create(data: Application): Promise<string> {
     try {
-      console.log("[ApplicationService] Creating application with data:", JSON.stringify(data, null, 2));
+      logger.info({ data }, "[ApplicationService] Creating application");
       if (!data) throw new Error("Invalid application data");
 
       const validatedData = ApplicationSchema.parse(data);
-      console.log("[ApplicationService] Data validated successfully");
-      
+      logger.debug("[ApplicationService] Data validated successfully");
+
       // Generate ID explicitly
       const docRef = db.collection(COLLECTION_PATH).doc(); // review why await is needed here
       const id = docRef.id;
-      console.log("[ApplicationService] Generated ID:", id, "at path:", COLLECTION_PATH);
+      logger.debug(
+        { id, path: COLLECTION_PATH },
+        "[ApplicationService] Generated ID"
+      );
 
       await docRef.set({
         ...validatedData,
@@ -52,10 +62,13 @@ export const applicationService = {
         createdAt: new Date().toISOString(),
         status: "Pending",
       });
-      console.log("[ApplicationService] Document saved to Firestore");
+      logger.info("[ApplicationService] Document saved to Firestore");
       return id;
     } catch (error) {
-      console.error("[ApplicationService] Error creating application:", error);
+      logger.error(
+        { err: error },
+        "[ApplicationService] Error creating application"
+      );
       throw error;
     }
   },
