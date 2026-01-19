@@ -2,7 +2,7 @@ import pino, {type LoggerOptions} from "pino";
 import { env } from "../utils/env";
 
 const isProduction = env.NODE_ENVIRONMENT === "production";
-const isTest = process.env.NODE_ENV === "test";
+const isTest = env.NODE_ENVIRONMENT === "test";
 
 export const pinoConfig: LoggerOptions = {
   level: isProduction ? "info" : "debug",

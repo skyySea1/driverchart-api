@@ -42,14 +42,14 @@ export const applicationService = {
 
   async create(data: Application): Promise<string> {
     try {
-      logger.info({ data }, "[ApplicationService] Creating application");
+      logger.info("[ApplicationService] Creating application");
       if (!data) throw new Error("Invalid application data");
 
       const validatedData = ApplicationSchema.parse(data);
       logger.debug("[ApplicationService] Data validated successfully");
 
       // Generate ID explicitly
-      const docRef = db.collection(COLLECTION_PATH).doc(); // review why await is needed here
+      const docRef = db.collection(COLLECTION_PATH).doc();
       const id = docRef.id;
       logger.debug(
         { id, path: COLLECTION_PATH },

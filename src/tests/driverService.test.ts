@@ -100,7 +100,7 @@ describe('driverService', () => {
       w9Signed: false
     };
 
-    const id = await driverService.createDriver(duplicateDriver as any);
+    const id = await driverService.createDriver(duplicateDriver);
 
     expect(id).toBe('existing-id');
     expect(mockSet).not.toHaveBeenCalled(); // Should NOT create new doc
