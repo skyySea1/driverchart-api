@@ -1,21 +1,26 @@
 import { z } from "zod";
 import dayjs from "dayjs";
 
+const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
 export const futureIsoDate = (message = "Date must be in the future") =>
   z.string()
     .min(1, { message })
-    .pipe(z.iso.date())
+    .regex(DATE_REGEX, "Invalid date format, expected YYYY-MM-DD")
+    .refine((dateStr) => dayjs(dateStr).isValid(), { message: "Invalid date" })
     .refine((dateStr) => dayjs(dateStr).isAfter(dayjs()), { message });
 
 export const pastIsoDate = (message = "Date must be in the past") =>
   z.string()
     .min(1, { message })
-    .pipe(z.iso.date())
+    .regex(DATE_REGEX, "Invalid date format, expected YYYY-MM-DD")
+    .refine((dateStr) => dayjs(dateStr).isValid(), { message: "Invalid date" })
     .refine((dateStr) => dayjs(dateStr).isBefore(dayjs()), { message });
 
+// Relaxed phone validation to accept international numbers or US format
 export const usPhoneNumber = (
   message = "Phone must be in format (XXX) XXX-XXXX or XXX-XXX-XXXX"
-) => z.string().regex(/^(\(\d{3}\)\s?\d{3}-\d{4}|\d{3}-\d{3}-\d{4})$/, message);
+) => z.string().min(5, "Phone number is too short"); 
 
 /**
  * Validates a U.S. Social Security Number for basic structural validity

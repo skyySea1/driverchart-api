@@ -12,9 +12,17 @@ export const applicationService = {
   async getAll(): Promise<Application[]> {
     if (!COLLECTION_PATH) throw new Error("Invalid collection path");
     const snapshot = await db.collection(COLLECTION_PATH).get();
-    return snapshot.docs.map((doc) =>
-      ApplicationSchema.parse({ id: doc.id, ...doc.data() })
-    );
+    
+    return snapshot.docs
+      .map((doc) => {
+        const result = ApplicationSchema.safeParse({ id: doc.id, ...doc.data() });
+        if (!result.success) {
+          console.warn(`[ApplicationService] Skipping invalid document ${doc.id}:`, JSON.stringify(result.error.issues));
+          return null;
+        }
+        return result.data;
+      })
+      .filter((doc): doc is Application => doc !== null);
   },
 
   async getById(id: string): Promise<Application | null> {
@@ -26,21 +34,30 @@ export const applicationService = {
   },
 
   async create(data: Application): Promise<string> {
-    if (!data) throw new Error("Invalid application data");
+    try {
+      console.log("[ApplicationService] Creating application with data:", JSON.stringify(data, null, 2));
+      if (!data) throw new Error("Invalid application data");
 
-    const validatedData = ApplicationSchema.parse(data);
-    
-    // Generate ID explicitly
-    const docRef = db.collection(COLLECTION_PATH).doc(); // review why await is needed here
-    const id = docRef.id;
+      const validatedData = ApplicationSchema.parse(data);
+      console.log("[ApplicationService] Data validated successfully");
+      
+      // Generate ID explicitly
+      const docRef = db.collection(COLLECTION_PATH).doc(); // review why await is needed here
+      const id = docRef.id;
+      console.log("[ApplicationService] Generated ID:", id, "at path:", COLLECTION_PATH);
 
-    await docRef.set({
-      ...validatedData,
-      id: id, // Store ID in the document
-      createdAt: new Date().toISOString(),
-      status: "Pending",
-    });
-    return id;
+      await docRef.set({
+        ...validatedData,
+        id: id, // Store ID in the document
+        createdAt: new Date().toISOString(),
+        status: "Pending",
+      });
+      console.log("[ApplicationService] Document saved to Firestore");
+      return id;
+    } catch (error) {
+      console.error("[ApplicationService] Error creating application:", error);
+      throw error;
+    }
   },
 
   async update(id: string, data: Partial<Application>): Promise<void> {

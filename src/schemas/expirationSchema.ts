@@ -5,6 +5,8 @@ export const ExpirationAlertSchema = z.object({
   type: z.enum(["critical", "warning", "info"]),
   message: z.string().min(1),
   entity: z.string().optional(),
+  entityId: z.string().optional(),
+  entityName: z.string().optional(),
   dueDate: z.string().min(1), // ISO string YYYY-MM-DD
 });
 

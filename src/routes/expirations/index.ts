@@ -36,6 +36,7 @@ export default async function (fastify: FastifyInstance) {
               type: "critical",
               message: `${d.lastName}: ${label} expired`,
               entity: `${d.firstName} ${d.lastName}`,
+              entityId: d.id,
               dueDate: date,
             });
           } else if (diff <= 30) {
@@ -43,6 +44,7 @@ export default async function (fastify: FastifyInstance) {
               type: "warning",
               message: `${d.firstName} ${d.lastName}: ${label} expiring soon`,
               entity: `${d.firstName} ${d.lastName}`,
+              entityId: d.id,
               dueDate: date,
             });
           }
