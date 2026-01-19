@@ -1,7 +1,8 @@
-import Fastify from "fastify";
+import Fastify, { FastifyError } from "fastify";
 import {
   serializerCompiler,
   validatorCompiler,
+  hasZodFastifySchemaValidationErrors,
 } from "fastify-type-provider-zod";
 
 import { corsPlugin } from "./plugins/corsPlugin";
@@ -18,15 +19,45 @@ import expirationRoutes from "./routes/expirations";
 import infoRoute from "./routes/info";
 import authRoutes from "./routes/auth";
 import { env } from "./utils/env";
+import { pinoConfig } from "./services/logger-service";
+import { AppError } from "./utils/errors";
 
 export async function buildApp() {
   const fastify = Fastify({
-    logger: true,
+    logger: pinoConfig,
   });
 
   // Set validator and serializer compilers for Zod
   fastify.setValidatorCompiler(validatorCompiler);
   fastify.setSerializerCompiler(serializerCompiler);
+
+  // Global Error Handler
+  fastify.setErrorHandler((error: FastifyError, request, reply) => {
+    // Handle Zod Validation Errors
+    if (hasZodFastifySchemaValidationErrors(error)) {
+      return reply.status(400).send({
+        error: "Validation Error",
+        message: "Invalid request data",
+        issues: error.validation,
+      });
+    }
+
+    // Handle Custom App Errors
+    if (error instanceof AppError) {
+      return reply.status(error.statusCode).send({
+        error: error.name,
+        message: error.message,
+        code: error.code,
+      });
+    }
+
+    // Handle unexpected errors
+    request.log.error(error);
+    return reply.status(500).send({
+      error: "Internal Server Error",
+      message: "Something went wrong",
+    });
+  });
 
   // Register Plugins
   await fastify.register(corsPlugin);

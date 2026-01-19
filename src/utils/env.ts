@@ -6,7 +6,7 @@ dotenv.config()
 export const envSchema = z.object({
   PORT: z.string().default("3000"),
   JWT_SECRET: z.string(),
-  NODE_ENVIRONMENT: z.enum(["development", "production", "preview"]).default("development"),
+  NODE_ENVIRONMENT: z.enum(["development", "production", "preview", "test"]).default("development"),
   FIREBASE_PROJECT_ID: z.string().optional(),
   FIREBASE_CLIENT_EMAIL: z.string().optional(),
   FIREBASE_PRIVATE_KEY: z.string().optional(),

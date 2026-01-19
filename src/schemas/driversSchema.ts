@@ -20,7 +20,7 @@ export const DriverSchema = z.object({
   zip: z.string().default(""),
   // Employment
   hireDate: z.string(),
-  terminationDate: z.string().optional(),
+  terminationDate: z.iso.date().optional(),
   hireStatus: z
     .enum(["Active", "Terminated", "Rehired"])
     .default("Active"),
