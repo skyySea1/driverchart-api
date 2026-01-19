@@ -36,6 +36,7 @@ const LicenseSchema = z.object({
   endorsements: z.string().default(""),
   restrictions: z.string().default(""),
   emissionDate: z.string().optional(),
+  emitionDate: z.string().optional(), // Support typo from some frontend versions
   expirationDate: z
     .string()
     .min(1, "Expiration date is required")
