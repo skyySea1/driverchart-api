@@ -1,4 +1,5 @@
 import Fastify, { FastifyError } from "fastify";
+import { z } from "zod";
 import {
   serializerCompiler,
   validatorCompiler,
@@ -39,6 +40,14 @@ export async function buildApp() {
         error: "Validation Error",
         message: "Invalid request data",
         issues: error.validation,
+      });
+    }
+
+    if (error instanceof z.ZodError) {
+      return reply.status(400).send({
+        error: "Validation Error",
+        message: "Invalid request data",
+        issues: error.issues,
       });
     }
 
