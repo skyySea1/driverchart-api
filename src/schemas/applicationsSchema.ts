@@ -13,7 +13,7 @@ const PersonalInfoSchema = z.object({
   ),
   ssnNumber: z
     .string()
-    // Relaxed SSN validation for testing add later:     .regex(/^\d{3}-\d{2}-\d{4}$/, "SSN must be in format XXX-XX-XXXX")
+    // TODO: Add strict SSN regex validation (format XXX-XX-XXXX).
     .or(z.literal("")),
   medicalExpirationDate: z.string().optional(),
 });

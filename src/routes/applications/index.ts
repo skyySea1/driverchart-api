@@ -67,21 +67,8 @@ export default async function (fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      try {
-        const id = await applicationService.create(request.body);
-        return reply.status(201).send({ id });
-      } catch (error) {
-        // If it's a validation error caught here (unlikely if global handler works, 
-        // but good for safety if we manually throw ZodErrors)
-        if (error instanceof z.ZodError) {
-          return reply.status(400).send({ 
-            error: "Validation Error",
-            message: "Validation error", 
-            issues: error.issues
-          });
-        }
-        throw error; // Let global handler handle other errors or 500
-      }
+      const id = await applicationService.create(request.body);
+      return reply.status(201).send({ id });
     }
   );
 
