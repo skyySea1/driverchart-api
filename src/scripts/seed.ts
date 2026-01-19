@@ -3,9 +3,10 @@ import { vehicleService } from "../services/vehicleService";
 import { applicationService } from "../services/applicationService";
 import { env } from "../utils/env";
 import dayjs from "dayjs";
+import { Driver } from "@/schemas/drivers.schema.js";
 
 // Richer Seed Data
-const drivers: any[] = [
+const drivers: Driver[] = [
   // 1. Valid Driver
   {
     firstName: "John",
@@ -43,6 +44,13 @@ const drivers: any[] = [
       phone: "555-0102",
       relationship: "Spouse",
     },
+    middleName: "",
+    ssnNumber: "",
+    address: "",
+    city: "",
+    state: "",
+    zip: "",
+    w9Signed: false,
   },
   // 2. Expiring Soon (CDL)
   {
@@ -53,6 +61,12 @@ const drivers: any[] = [
     email: "alice.smith@example.com",
     hireDate: "2021-03-15",
     hireStatus: "Active",
+    middleName: "",
+    ssnNumber: "",
+    address: "",
+    city: "",
+    state: "",
+    zip: "",
     cdl: {
       documentNumber: "S98765432",
       state: "NY",
@@ -81,6 +95,7 @@ const drivers: any[] = [
       phone: "555-0203",
       relationship: "Brother",
     },
+    w9Signed: false,
   },
   // 3. Expired (Medical)
   {
@@ -119,6 +134,13 @@ const drivers: any[] = [
       phone: "555-0304",
       relationship: "Sister",
     },
+    middleName: "",
+    ssnNumber: "",
+    address: "",
+    city: "",
+    state: "",
+    zip: "",
+    w9Signed: false,
   },
   // 4. Terminated Driver
   {
@@ -131,11 +153,22 @@ const drivers: any[] = [
     hireStatus: "Terminated",
     terminationDate: "2023-12-31",
     cdl: { documentNumber: "D998877", state: "CA", expiryDate: "" },
-    medical: { documentNumber: "", expiryDate: "" },
+    medical: {
+      documentNumber: "",
+      expiryDate: "",
+      registry: "",
+    },
     mvr: { documentNumber: "", expiryDate: "" },
     drugAlcohol: { documentNumber: "", expiryDate: "" },
     roadTest: { documentNumber: "", examiner: "", date: "" },
     emergencyContact: { name: "", phone: "", relationship: "" },
+    middleName: "",
+    ssnNumber: "",
+    address: "",
+    city: "",
+    state: "",
+    zip: "",
+    w9Signed: false,
   },
   // 5. New Hire (Missing Docs)
   {
@@ -147,11 +180,26 @@ const drivers: any[] = [
     hireDate: dayjs().format("YYYY-MM-DD"), // Today
     hireStatus: "Active",
     cdl: { documentNumber: "", state: "", expiryDate: "" },
-    medical: { documentNumber: "", expiryDate: "" },
+    medical: {
+      documentNumber: "",
+      expiryDate: "",
+      registry: "",
+    },
     mvr: { documentNumber: "", expiryDate: "" },
     drugAlcohol: { documentNumber: "", expiryDate: "" },
     roadTest: { documentNumber: "", examiner: "", date: "" },
-    emergencyContact: { name: "Bruce Wayne", phone: "555-0506", relationship: "Friend" },
+    emergencyContact: {
+      name: "Bruce Wayne",
+      phone: "555-0506",
+      relationship: "Friend",
+    },
+    middleName: "",
+    ssnNumber: "",
+    address: "",
+    city: "",
+    state: "",
+    zip: "",
+    w9Signed: false,
   },
   // 6. Expiring Soon (Multiple)
   {
@@ -190,6 +238,13 @@ const drivers: any[] = [
       phone: "555-0607",
       relationship: "Associate",
     },
+    middleName: "",
+    ssnNumber: "",
+    address: "",
+    city: "",
+    state: "",
+    zip: "",
+    w9Signed: false,
   },
   // 7-15: Generated Drivers
   ...Array.from({ length: 9 }).map((_, i) => ({
@@ -199,11 +254,19 @@ const drivers: any[] = [
     phone: `555-070${i}`,
     email: `driver${i + 7}@test.com`,
     hireDate: "2021-01-01",
-    hireStatus: "Active",
+    hireStatus: "Active" as const,
+    middleName: "",
+    ssnNumber: "",
+    address: "",
+    city: "",
+    state: "",
+    zip: "",
     cdl: {
       documentNumber: `D${1000 + i}`,
       state: "FL",
-      expiryDate: dayjs().add(6 + i, "month").format("YYYY-MM-DD"),
+      expiryDate: dayjs()
+        .add(6 + i, "month")
+        .format("YYYY-MM-DD"),
     },
     medical: {
       documentNumber: `M${1000 + i}`,
@@ -228,6 +291,7 @@ const drivers: any[] = [
       phone: "555-0000",
       relationship: "None",
     },
+    w9Signed: false,
   })),
 ];
 
@@ -264,7 +328,10 @@ const vehicles: any[] = [
     busNumber: "BUS-105",
     vin: "3N1GDM9A_BB445566",
     vehicleStatus: "Active",
-    lastAnnualInspection: dayjs().subtract(11, "month").add(20, "day").format("YYYY-MM-DD"), // Expiring soon
+    lastAnnualInspection: dayjs()
+      .subtract(11, "month")
+      .add(20, "day")
+      .format("YYYY-MM-DD"), // Expiring soon
     mileage: 67000,
   },
 ];

@@ -1,0 +1,25 @@
+import pino, {type LoggerOptions} from "pino";
+import { env } from "../utils/env";
+
+const isProduction = env.NODE_ENVIRONMENT === "production";
+const isTest = process.env.NODE_ENV === "test";
+
+export const pinoConfig: LoggerOptions = {
+  level: isProduction ? "info" : "debug",
+  base: {
+    env: env.NODE_ENVIRONMENT,
+  },
+};
+
+// Transport only in development (not in tests)
+if (!isProduction && !isTest) {
+  pinoConfig.transport = {
+    target: "pino-pretty",
+    options: {
+      translateTime: "HH:MM:ss Z",
+      ignore: "pid,hostname",
+    },
+  };
+}
+
+export const logger = pino(pinoConfig);
