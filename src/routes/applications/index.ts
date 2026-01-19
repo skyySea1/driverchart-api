@@ -58,9 +58,10 @@ export default async function (fastify: FastifyInstance) {
         response: {
           201: z.object({ id: z.string() }),
           400: z.object({ 
+            statusCode: z.number().optional(),
             error: z.string(), 
             message: z.string(), 
-            issues: z.array(z.any()) 
+            issues: z.array(z.any()).optional() 
           }),
           500: z.object({ message: z.string(), error: z.string() }),
         },
