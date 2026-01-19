@@ -3,7 +3,7 @@ import { vehicleService } from "../services/vehicleService";
 import { applicationService } from "../services/applicationService";
 import { env } from "../utils/env";
 import dayjs from "dayjs";
-import { Driver } from "@/schemas/drivers.schema.js";
+import { Driver } from "@/schemas/driversSchema";
 
 // Richer Seed Data
 const drivers: Driver[] = [
@@ -338,58 +338,68 @@ const vehicles: any[] = [
 
 const applications: any[] = [
   {
-    firstName: "Michael",
-    lastName: "Jordan",
-    email: "mj@bulls.com",
-    phone: "555-2323",
+    personalInfo: {
+      firstName: "Michael",
+      lastName: "Jordan",
+      email: "mj@bulls.com",
+      phone: "555-2323",
+    },
     status: "Pending",
     appliedDate: dayjs().subtract(2, "day").format("YYYY-MM-DD"),
     experienceYears: 10,
-    cdlNumber: "A1234567",
+    licenses: [{ number: "A1234567" }],
     notes: "Legendary driver.",
   },
   {
-    firstName: "Larry",
-    lastName: "Bird",
-    email: "lb@celtics.com",
-    phone: "555-3333",
+    personalInfo: {
+      firstName: "Larry",
+      lastName: "Bird",
+      email: "lb@celtics.com",
+      phone: "555-3333",
+    },
     status: "Approved",
     appliedDate: dayjs().subtract(5, "day").format("YYYY-MM-DD"),
     experienceYears: 12,
-    cdlNumber: "B7654321",
+    licenses: [{ number: "B7654321" }],
     notes: "Great awareness.",
   },
   {
-    firstName: "Magic",
-    lastName: "Johnson",
-    email: "magic@lakers.com",
-    phone: "555-4444",
+    personalInfo: {
+      firstName: "Magic",
+      lastName: "Johnson",
+      email: "magic@lakers.com",
+      phone: "555-4444",
+    },
     status: "Rejected",
     appliedDate: dayjs().subtract(10, "day").format("YYYY-MM-DD"),
     experienceYears: 2,
-    cdlNumber: "C998877",
+    licenses: [{ number: "C998877" }],
     notes: "Not enough experience.",
   },
   {
-    firstName: "Shaq",
-    lastName: "O'Neal",
-    email: "shaq@lakers.com",
-    phone: "555-5555",
+    personalInfo: {
+      firstName: "Shaq",
+      lastName: "O'Neal",
+      email: "shaq@lakers.com",
+      phone: "555-5555",
+    },
     status: "Pending",
     appliedDate: dayjs().format("YYYY-MM-DD"),
     experienceYears: 5,
-    cdlNumber: "D556677",
+    licenses: [{ number: "D556677" }],
     notes: "Big presence.",
   },
   {
-    firstName: "Kobe",
-    lastName: "Bryant",
-    email: "kobe@lakers.com",
-    phone: "555-8248",
+    personalInfo: {
+      firstName: "Kobe",
+      lastName: "Bryant",
+      email: "kobe@lakers.com",
+      phone: "555-8248",
+    },
     status: "Pending",
     appliedDate: dayjs().subtract(1, "day").format("YYYY-MM-DD"),
     experienceYears: 8,
-    cdlNumber: "E248248",
+    licenses: [{ number: "E248248" }],
     notes: "Mamba mentality.",
   },
 ];
@@ -413,7 +423,8 @@ async function seed() {
     console.log("Seeding Applications...");
     for (const a of applications) {
       await applicationService.create(a);
-      console.log(`Created application: ${a.firstName} ${a.lastName}`);
+      // Accessing firstName from personalInfo
+      console.log(`Created application: ${a.personalInfo.firstName} ${a.personalInfo.lastName}`);
     }
 
     console.log("Seed completed successfully!");

@@ -57,7 +57,11 @@ export default async function (fastify: FastifyInstance) {
         body: ApplicationSchema,
         response: {
           201: z.object({ id: z.string() }),
-          400: z.object({ message: z.string(), errors: z.array(z.any()) }),
+          400: z.object({ 
+            error: z.string(), 
+            message: z.string(), 
+            issues: z.array(z.any()) 
+          }),
           500: z.object({ message: z.string(), error: z.string() }),
         },
       },
@@ -67,17 +71,16 @@ export default async function (fastify: FastifyInstance) {
         const id = await applicationService.create(request.body);
         return reply.status(201).send({ id });
       } catch (error) {
-        fastify.log.error(error);
+        // If it's a validation error caught here (unlikely if global handler works, 
+        // but good for safety if we manually throw ZodErrors)
         if (error instanceof z.ZodError) {
           return reply.status(400).send({ 
+            error: "Validation Error",
             message: "Validation error", 
-            errors: error.issues
+            issues: error.issues
           });
         }
-        return reply.status(500).send({ 
-          message: "Internal server error",
-          error: error instanceof Error ? error.message : "Unknown error"
-        });
+        throw error; // Let global handler handle other errors or 500
       }
     }
   );

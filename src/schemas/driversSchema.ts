@@ -11,7 +11,7 @@ export const DriverSchema = z.object({
   middleName: z.string().default(""),
   lastName: z.string().min(1, "Last name is required"),
   dob: z.string().min(1, "Date of birth is required"),
-  ssn: z.string().default(""),
+  ssnNumber: z.string().default(""),
   phone: z.string().min(1, "Phone number is required"),
   email: z.email("Invalid email address").or(z.literal("")),
   address: z.string().default(""),
@@ -20,7 +20,7 @@ export const DriverSchema = z.object({
   zip: z.string().default(""),
   // Employment
   hireDate: z.string(),
-  terminationDate: z.iso.date().optional(),
+  terminationDate: z.string().optional(),
   hireStatus: z
     .enum(["Active", "Terminated", "Rehired"])
     .default("Active"),
@@ -60,6 +60,8 @@ export const DriverSchema = z.object({
     phone: z.string().default(""),
     relationship: z.string().default(""),
   }),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
 });
 
 export type Driver = z.infer<typeof DriverSchema>;
