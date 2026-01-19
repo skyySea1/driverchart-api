@@ -35,7 +35,7 @@ const LicenseSchema = z.object({
   class: z.string().min(1, "License class is required"),
   endorsements: z.string().default(""),
   restrictions: z.string().default(""),
-  emitionDate: z.string().optional(),
+  emissionDate: z.string().optional(),
   expirationDate: z
     .string()
     .min(1, "Expiration date is required")
@@ -90,10 +90,10 @@ export const ApplicationSchema = z.object({
   vehicleExperience: z.array(VehicleExperienceSchema).default([]),
   accidents: z.array(AccidentSchema).default([]),
   violations: z.array(ViolationSchema).default([]),
-  forfeitures: z.string().optional().default(''),
+  forfeitures: z.string().optional().default(""),
   deniedLicense: z.boolean().default(false),
   suspendedLicense: z.boolean().default(false),
-  denialSuspensionExplanation: z.string().optional().default(''),
+  denialSuspensionExplanation: z.string().optional().default(""),
   employmentHistory: z.array(EmploymentSchema).default([]),
   notes: z.string().optional().default(""),
   status: z.enum(["Pending", "Approved", "Rejected"]).default("Pending"),
