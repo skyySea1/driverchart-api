@@ -23,7 +23,7 @@ const AddressSchema = z.object({
   street: z.string().min(1, "Street is required"),
   city: z.string().min(1, "City is required"),
   state: z.string().length(2, "State must be 2 characters"),
-  zip: z.string().regex(/^\d{5}(-\d{4})?$/, "Invalid ZIP code"),
+  zip: z.string().min(5, "ZIP code is required"),
   fromDate: pastIsoDate("From date is required"),
   toDate: z.string().optional(), // Optional for current address
 });
@@ -66,7 +66,7 @@ const EmploymentSchema = z.object({
   address: z.string().min(1, "Address is required"),
   city: z.string().min(1, "City is required"),
   state: z.string().length(2, "State must be 2 characters"),
-  zip: z.string().regex(/^\d{5}(-\d{4})?$/, "Invalid ZIP code"),
+  zip: z.string().min(5, "ZIP code is required"),
   phone: usPhoneNumber(
     "Phone must be in format (XXX) XXX-XXXX or XXX-XXX-XXXX"
   ),
