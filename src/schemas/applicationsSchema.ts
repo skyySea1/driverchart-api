@@ -80,7 +80,6 @@ const EmploymentSchema = z.object({
 
 const VehicleExperienceSchema = z.object({
   type: z.string(),
-  totalMileage: z.union([z.string(), z.number()]),
 });
 
 export const ApplicationSchema = z.object({
