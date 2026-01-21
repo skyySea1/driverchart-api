@@ -68,7 +68,6 @@ describe('Application Routes', () => {
       "vehicleExperience": [
         {
           "type": "Passenger Bus",
-          "totalMileage": "10000"
         }
       ],
       "accidents": [],

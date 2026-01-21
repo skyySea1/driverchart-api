@@ -37,7 +37,6 @@ const payload = {
   "vehicleExperience": [
     {
       "type": "Passenger Bus",
-      "totalMileage": "10000"
     }
   ],
   "accidents": [],
