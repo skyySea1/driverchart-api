@@ -100,6 +100,21 @@ export const ApplicationSchema = z.object({
   appliedDate: z.string().optional(),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
+
+  // upload fields
+  licenseFront: z.any().optional(),
+  licenseBack: z.any().optional(),
+  medicalCard: z.any().optional(),
+  drugTestPositiveOrRefusal: z.boolean().default(false),
+  drugTestDocumentation: z.enum(["Yes", "No", "N/A"]).default("N/A"),
+  drugTestSignature: z.string().optional().default(""),
+  drugTestDate: z.string().optional().default(""),
+  authReleaseSignature: z.string().optional().default(""),
+  authReleaseDate: z.string().optional().default(""),
+  pspDisclosureSignature: z.string().optional().default(""),
+  pspDisclosureDate: z.string().optional().default(""),
+  fmcsaConsentSignature: z.string().optional().default(""),
+  fmcsaConsentDate: z.string().optional().default(""),
 });
 
 export type Application = z.infer<typeof ApplicationSchema>;
