@@ -80,6 +80,7 @@ const EmploymentSchema = z.object({
 
 const VehicleExperienceSchema = z.object({
   type: z.string(),
+  experienceYears: z.number().min(0, "Experience years cannot be negative").default(0),
 });
 
 export const ApplicationSchema = z.object({
@@ -115,6 +116,12 @@ export const ApplicationSchema = z.object({
   pspDisclosureDate: z.string().optional().default(""),
   fmcsaConsentSignature: z.string().optional().default(""),
   fmcsaConsentDate: z.string().optional().default(""),
+  alcoholDrugPolicySignature: z.string().optional().default(""),
+  alcoholDrugPolicyDate: z.string().optional().default(""),
+  generalWorkPolicySignature: z.string().optional().default(""),
+  generalWorkPolicyDate: z.string().optional().default(""),
+  fairCreditReportingSignature: z.string().optional().default(""),
+  fairCreditReportingDate: z.string().optional().default(""),
 });
 
 export type Application = z.infer<typeof ApplicationSchema>;

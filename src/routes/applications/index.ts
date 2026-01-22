@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
-import { ApplicationSchema } from "../../schemas/applicationsSchema";
+import { ApplicationSchema } from "../../schemas/applicationSchema";
 import { applicationService } from "../../services/applicationService";
 import { z } from "zod";
 
@@ -57,11 +57,11 @@ export default async function (fastify: FastifyInstance) {
         body: ApplicationSchema,
         response: {
           201: z.object({ id: z.string() }),
-          400: z.object({ 
+          400: z.object({
             statusCode: z.number().optional(),
-            error: z.string(), 
-            message: z.string(), 
-            issues: z.array(z.any()).optional() 
+            error: z.string(),
+            message: z.string(),
+            issues: z.array(z.any()).optional(),
           }),
           500: z.object({ message: z.string(), error: z.string() }),
         },

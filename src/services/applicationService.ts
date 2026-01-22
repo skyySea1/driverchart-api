@@ -1,5 +1,8 @@
 import { db } from "./firebaseService";
-import { ApplicationSchema, type Application } from "../schemas/applicationsSchema";
+import {
+  ApplicationSchema,
+  type Application,
+} from "../schemas/applicationSchema";
 import { env } from "../utils/env";
 import { logger } from "./logger-service";
 
