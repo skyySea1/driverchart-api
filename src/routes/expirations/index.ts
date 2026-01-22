@@ -34,16 +34,18 @@ export default async function (fastify: FastifyInstance) {
           if (diff < 0) {
             alerts.push({
               type: "critical",
-              message: `${d.lastName}: ${label} expired`,
-              entity: `${d.firstName} ${d.lastName}`,
+              message: `${label} expired`,
+              entity: "Driver",
+              entityName: `${d.firstName} ${d.lastName}`,
               entityId: d.id,
               dueDate: date,
             });
           } else if (diff <= 30) {
             alerts.push({
               type: "warning",
-              message: `${d.firstName} ${d.lastName}: ${label} expiring soon`,
-              entity: `${d.firstName} ${d.lastName}`,
+              message: `${label} expiring soon`,
+              entity: "Driver",
+              entityName: `${d.firstName} ${d.lastName}`,
               entityId: d.id,
               dueDate: date,
             });
