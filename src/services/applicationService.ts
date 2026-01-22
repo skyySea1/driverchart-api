@@ -1,8 +1,5 @@
 import { db } from "./firebaseService";
-import {
-  ApplicationSchema,
-  type Application,
-} from "../schemas/applicationsSchema";
+import { ApplicationSchema, type Application } from "../schemas/applicationsSchema";
 import { env } from "../utils/env";
 import { logger } from "./logger-service";
 
@@ -11,7 +8,7 @@ const COLLECTION_PATH = `artifacts/${APP_ID}/public/data/applications`;
 
 export const applicationService = {
   async getAll(): Promise<Application[]> {
-    if (!COLLECTION_PATH) throw new Error("Invalid collection path");
+    if (!COLLECTION_PATH) throw new Error("Invalid firebase collection path");
     const snapshot = await db.collection(COLLECTION_PATH).get();
 
     return snapshot.docs
