@@ -5,6 +5,7 @@ import {
   validatorCompiler,
   hasZodFastifySchemaValidationErrors,
 } from "fastify-type-provider-zod";
+import fastifyMultipart from "@fastify/multipart";
 
 import { corsPlugin } from "./plugins/corsPlugin";
 import { authPlugin } from "./plugins/authPlugin";
@@ -72,6 +73,11 @@ export async function buildApp() {
   await fastify.register(corsPlugin);
   await fastify.register(authPlugin);
   await fastify.register(swaggerPlugin);
+  await fastify.register(fastifyMultipart, {
+    limits: {
+      fileSize: 10485760, // 10MB
+    },
+  });
 
   // Register Routes
   await fastify.register(authRoutes, { prefix: "/api/auth" });
