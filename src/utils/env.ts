@@ -12,6 +12,7 @@ export const envSchema = z.object({
   FIREBASE_PRIVATE_KEY: z.string().optional(),
   FIREBASE_WEB_API_KEY: z.string().optional(),
   FIREBASE_APP_ID: z.string().default("dot-compliance-app"),
+  FIREBASE_STORAGE_BUCKET: z.string().optional(),
   APP_ID: z.string().default("dot-compliance-app"),
 })
 
