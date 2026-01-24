@@ -51,6 +51,7 @@ if (!admin.apps.length) {
     admin.initializeApp({
       credential,
       projectId: env.FIREBASE_PROJECT_ID,
+      storageBucket: env.FIREBASE_STORAGE_BUCKET,
     });
     console.log("🔥 Firebase Admin initialized successfully 🔥\n");
   } catch (error) {
