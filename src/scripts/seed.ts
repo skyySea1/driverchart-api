@@ -16,7 +16,7 @@ const drivers: Driver[] = [
     email: "john.doe@example.com",
     hireDate: "2020-01-10",
     hireStatus: "Active",
-    cdl: {
+    license: {
       documentNumber: "D12345678",
       state: "FL",
       expiryDate: dayjs().add(2, "year").format("YYYY-MM-DD"),
@@ -67,7 +67,7 @@ const drivers: Driver[] = [
     city: "",
     state: "",
     zip: "",
-    cdl: {
+    license: {
       documentNumber: "S98765432",
       state: "NY",
       expiryDate: dayjs().add(15, "day").format("YYYY-MM-DD"), // Expiring soon
@@ -106,7 +106,7 @@ const drivers: Driver[] = [
     email: "bob.j@example.com",
     hireDate: "2019-06-01",
     hireStatus: "Active",
-    cdl: {
+    license: {
       documentNumber: "C11223344",
       state: "TX",
       expiryDate: dayjs().add(1, "year").format("YYYY-MM-DD"),
@@ -152,7 +152,7 @@ const drivers: Driver[] = [
     hireDate: "2022-01-01",
     hireStatus: "Terminated",
     terminationDate: "2023-12-31",
-    cdl: { documentNumber: "D998877", state: "CA", expiryDate: "" },
+    license: { documentNumber: "D998877", state: "CA", expiryDate: "" },
     medical: {
       documentNumber: "",
       expiryDate: "",
@@ -179,7 +179,7 @@ const drivers: Driver[] = [
     email: "diana.p@example.com",
     hireDate: dayjs().format("YYYY-MM-DD"), // Today
     hireStatus: "Active",
-    cdl: { documentNumber: "", state: "", expiryDate: "" },
+    license: { documentNumber: "", state: "", expiryDate: "" },
     medical: {
       documentNumber: "",
       expiryDate: "",
@@ -210,7 +210,7 @@ const drivers: Driver[] = [
     email: "e.nygma@example.com",
     hireDate: "2018-04-01",
     hireStatus: "Active",
-    cdl: {
+    license: {
       documentNumber: "Q123123",
       state: "NJ",
       expiryDate: dayjs().add(10, "day").format("YYYY-MM-DD"), // Expiring
@@ -261,7 +261,7 @@ const drivers: Driver[] = [
     city: "",
     state: "",
     zip: "",
-    cdl: {
+    license: {
       documentNumber: `D${1000 + i}`,
       state: "FL",
       expiryDate: dayjs()
@@ -424,7 +424,9 @@ async function seed() {
     for (const a of applications) {
       await applicationService.create(a);
       // Accessing firstName from personalInfo
-      console.log(`Created application: ${a.personalInfo.firstName} ${a.personalInfo.lastName}`);
+      console.log(
+        `Created application: ${a.personalInfo.firstName} ${a.personalInfo.lastName}`
+      );
     }
 
     console.log("Seed completed successfully!");

@@ -52,7 +52,7 @@ export default async function (fastify: FastifyInstance) {
           }
         };
 
-        check(d.cdl?.expiryDate, "CDL");
+        check(d.license?.expiryDate, "License");
         check(d.medical?.expiryDate, "Medical");
         check(d.mvr?.expiryDate, "MVR");
       });

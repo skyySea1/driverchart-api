@@ -1,13 +1,13 @@
-import { db } from "./firebaseService";
+import { db, storage } from "./firebaseService";
 import {
   DocumentLogSchema,
   type DocumentLog,
 } from "../schemas/documentsSchema";
+import { pipeline } from "node:stream/promises";
 
+// review how pipeline works
 const APP_ID = process.env.FIREBASE_APP_ID || "dot-compliance-app";
 const COLLECTION_PATH = `artifacts/${APP_ID}/public/data/document_logs`;
-// added schema parsing to ensure data integrity and validation
-// todo add error handling for create and update operations
 
 export const documentService = {
   async getAll(): Promise<DocumentLog[]> {
@@ -37,5 +37,21 @@ export const documentService = {
     return snapshot.docs.map((doc) =>
       DocumentLogSchema.parse({ id: doc.id, ...doc.data() })
     );
+  },
+
+  async uploadFile(fileStream: any, mimeType: string, filePath: string): Promise<string> {
+    const bucket = storage.bucket();
+    const fileRef = bucket.file(filePath);
+
+    const writeStream = fileRef.createWriteStream({
+      metadata: {
+        contentType: mimeType,
+      },
+    });
+
+    await pipeline(fileStream, writeStream);
+    await fileRef.makePublic();
+
+    return fileRef.publicUrl();
   },
 };

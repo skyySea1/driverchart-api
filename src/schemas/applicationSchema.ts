@@ -103,9 +103,9 @@ export const ApplicationSchema = z.object({
   updatedAt: z.string().optional(),
 
   // upload fields
-  licenseFront: z.any().optional(),
-  licenseBack: z.any().optional(),
-  medicalCard: z.any().optional(),
+  licenseFront: z.string().optional().or(z.null()),
+  licenseBack: z.string().optional().or(z.null()),
+  medicalCard: z.string().optional().or(z.null()),
   drugTestPositiveOrRefusal: z.boolean().default(false),
   drugTestDocumentation: z.enum(["Yes", "No", "N/A"]).default("N/A"),
   drugTestSignature: z.string().optional().default(""),
