@@ -42,4 +42,45 @@ export default async function (fastify: FastifyInstance) {
       return reply.status(201).send({ id });
     }
   );
+
+  server.put(
+    "/:id",
+    {
+      onRequest: [fastify.authenticate],
+      schema: {
+        description: "Update a user",
+        tags: ["Users"],
+        params: z.object({ id: z.string() }),
+        body: UserSchema.partial(),
+        response: {
+          200: z.object({ message: z.string() }),
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params;
+      await userService.updateUser(id, request.body);
+      return reply.status(200).send({ message: "User updated successfully" });
+    }
+  );
+
+  server.delete(
+    "/:id",
+    {
+      onRequest: [fastify.authenticate],
+      schema: {
+        description: "Delete a user",
+        tags: ["Users"],
+        params: z.object({ id: z.string() }),
+        response: {
+          200: z.object({ message: z.string() }),
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params;
+      await userService.deleteUser(id);
+      return reply.status(200).send({ message: "User deleted successfully" });
+    }
+  );
 }

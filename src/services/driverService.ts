@@ -31,20 +31,23 @@ export const driverService = {
 
     // Check for existing driver with same email (uniqueness check)
     if (validatedData.email) {
-      const existing = await db.collection(COLLECTION_PATH)
-        .where('email', '==', validatedData.email)
+      const existing = await db
+        .collection(COLLECTION_PATH)
+        .where("email", "==", validatedData.email)
         .get();
-      
+
       if (!existing.empty) {
         // Return existing ID instead of creating duplicate
         // OR throw error depending on desired behavior.
         // For seed script stability, we return existing ID.
         // For API, throwing might be better but let's be idempotent for now.
-        console.log(`Driver with email ${validatedData.email} already exists. Skipping creation.`);
+        console.log(
+          `Driver with email ${validatedData.email} already exists. Skipping creation.`
+        );
         return existing.docs[0].id;
       }
     }
-    
+
     // Generate ID explicitly so we can store it in the document
     const docRef = db.collection(COLLECTION_PATH).doc();
     const id = docRef.id;
@@ -67,24 +70,56 @@ export const driverService = {
 
     if (currentDoc) {
       const driverName = `${currentDoc.firstName} ${currentDoc.lastName}`;
-      const logChange = async (type: string, oldFile?: string | null, newFile?: string | null) => {
+      const logChange = async (
+        type: string,
+        oldFile?: string | null,
+        newFile?: string | null
+      ) => {
         if (newFile && newFile !== oldFile) {
+          // Extrair nome limpo do arquivo decodificando a URL e pegando a última parte
+          let cleanFileName = "document";
+          try {
+            const decoded = decodeURIComponent(newFile);
+            cleanFileName = decoded.split("/").pop() || "document";
+            // Remover parâmetros de query se houver (ex: ?alt=media)
+            cleanFileName = cleanFileName.split("?")[0];
+          } catch (e) {
+            cleanFileName = newFile.split("/").pop() || "document";
+          }
+
           await documentService.createLog({
             date: dayjs().toISOString(),
-            fileName: newFile.split('/').pop() || 'unknown-file',
+            fileName: cleanFileName,
             type: type,
             entityName: driverName,
-            user: 'System Admin', // todo: get user from context
+            user: "System Audit",
           });
         }
       };
 
       await Promise.all([
-        logChange('CDL', currentDoc.cdl?.file, validatedData.cdl?.file),
-        logChange('Medical', currentDoc.medical?.file, validatedData.medical?.file),
-        logChange('MVR', currentDoc.mvr?.file, validatedData.mvr?.file),
-        logChange('Drug & Alcohol', currentDoc.drugAlcohol?.file, validatedData.drugAlcohol?.file),
-        logChange('Road Test', currentDoc.roadTest?.file, validatedData.roadTest?.file),
+        logChange(
+          "License",
+          currentDoc.license?.file,
+          validatedData.license?.file
+        ),
+        logChange(
+          "Medical Certificate",
+          currentDoc.medical?.file,
+          validatedData.medical?.file
+        ),
+        logChange("MVR Report", currentDoc.mvr?.file, validatedData.mvr?.file),
+        logChange(
+          "Drug & Alcohol",
+          currentDoc.drugAlcohol?.file,
+          validatedData.drugAlcohol?.file
+        ),
+        logChange(
+          "Road Test",
+          currentDoc.roadTest?.file,
+          validatedData.roadTest?.file
+        ),
+        logChange("SSN Card", currentDoc.ssnDoc, (validatedData as any).ssnDoc),
       ]);
     }
 

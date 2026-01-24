@@ -21,9 +21,7 @@ export const DriverSchema = z.object({
   // Employment
   hireDate: z.string(),
   terminationDate: z.string().optional(),
-  hireStatus: z
-    .enum(["Active", "Terminated", "Rehired"])
-    .default("Active"),
+  hireStatus: z.enum(["Active", "Terminated", "Rehired"]).default("Active"),
 
   // Banking / Tax / Legal
   bankName: z.string().optional(),
@@ -37,7 +35,7 @@ export const DriverSchema = z.object({
   ssnDocName: z.string().optional(),
 
   // Compliance Sections
-  cdl: ComplianceItemSchema.extend({
+  license: ComplianceItemSchema.extend({
     state: z.string().default(""),
     value: z.string().optional(),
   }),
