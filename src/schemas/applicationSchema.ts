@@ -102,6 +102,11 @@ export const ApplicationSchema = z.object({
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
 
+  // Flagging fields
+  isFlagged: z.boolean().optional().default(false),
+  flagReason: z.string().optional().default(""),
+  flagDate: z.string().optional().default(""),
+
   // upload fields
   licenseFront: z.string().optional().or(z.null()),
   licenseBack: z.string().optional().or(z.null()),
