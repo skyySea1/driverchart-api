@@ -75,7 +75,7 @@ const EmploymentSchema = z.object({
   fromDate: pastIsoDate("From date is required"),
   toDate: z.string().optional(), // Optional for current employment
   reasonForLeaving: z.string().default(""),
-  wasCDL: z.boolean().default(false),
+  wasCdl: z.boolean().default(false),
 });
 
 const VehicleExperienceSchema = z.object({

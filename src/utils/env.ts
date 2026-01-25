@@ -14,6 +14,7 @@ export const envSchema = z.object({
   FIREBASE_APP_ID: z.string().default("dot-compliance-app"),
   FIREBASE_STORAGE_BUCKET: z.string().optional(),
   APP_ID: z.string().default("dot-compliance-app"),
+  RESEND_API_KEY: z.string().optional(),
 })
 
 export const env = envSchema.parse(process.env)

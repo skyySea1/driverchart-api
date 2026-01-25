@@ -1,8 +1,10 @@
 import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { DocumentLogSchema } from "../../schemas/documentsSchema";
+import { AuditLogSchema } from "../../schemas/auditSchema";
 import { documentService } from "../../services/documentService";
 import { driverService } from "../../services/driverService";
+import { emailService } from "../../services/emailService";
 import { env } from "../../utils/env";
 import { z } from "zod";
 import dayjs from "dayjs";
@@ -71,6 +73,25 @@ export default async function (fastify: FastifyInstance) {
     async (request) => {
       const { entityName } = request.params;
       return await documentService.getByEntity(entityName);
+    }
+  );
+
+  server.get(
+    "/audit/:entityId",
+    {
+      onRequest: [fastify.authenticate],
+      schema: {
+        description: "Get audit logs for a specific entity",
+        tags: ["Documents"],
+        params: z.object({ entityId: z.string() }),
+        response: {
+          200: z.array(AuditLogSchema),
+        },
+      },
+    },
+    async (request) => {
+      const { entityId } = request.params;
+      return await documentService.getAuditByEntity(entityId);
     }
   );
 
@@ -164,6 +185,16 @@ export default async function (fastify: FastifyInstance) {
             updateData.ssnDocName = filename;
           }
           await driverService.updateDriver(driverId, updateData);
+          
+          // Log the profile update for the document link
+          await documentService.createAuditLog({
+            entityId: driverId,
+            entityName: entityName || (currentDriver as any).firstName + " " + (currentDriver as any).lastName,
+            type: 'profile_update',
+            date: dayjs().toISOString(),
+            user: (request.user as any).name || (request.user as any).email || "Unknown User",
+            description: `Uploaded and linked ${documentType}: ${filename}`,
+          });
         }
       }
 
@@ -175,11 +206,112 @@ export default async function (fastify: FastifyInstance) {
           fileName: filename,
           type: documentType,
           entityName: entityName || applicantName,
-          user: "Public Portal / System",
+          user: (request.user as any).name || (request.user as any).email || "User",
         });
       }
 
       return { url, filename: filename };
+    }
+  );
+
+  // --- NEW ROUTES FOR REQUESTS AND MEMOS ---
+
+  server.post(
+    "/request-upload",
+    {
+      onRequest: [fastify.authenticate],
+      schema: {
+        description: "Send a document upload request email to a driver",
+        tags: ["Documents"],
+        body: z.object({
+          email: z.string().email(),
+          driverName: z.string(),
+          requestType: z.string(),
+          magicLink: z.string(),
+        }),
+      },
+    },
+    async (request, reply) => {
+      const { email, driverName, requestType, magicLink } = request.body;
+      await emailService.sendUploadRequest(email, driverName, requestType, magicLink);
+      return { success: true };
+    }
+  );
+
+  server.post(
+    "/send-memos",
+    {
+      onRequest: [fastify.authenticate],
+      schema: {
+        description: "Send memos/policies to a driver via email",
+        tags: ["Documents"],
+        body: z.object({
+          email: z.string().email(),
+          driverName: z.string(),
+          memoTitle: z.string(),
+          memoLinks: z.array(z.string()),
+        }),
+      },
+    },
+    async (request, reply) => {
+      const { email, driverName, memoTitle, memoLinks } = request.body;
+      await emailService.sendMemo(email, driverName, memoTitle, memoLinks);
+      return { success: true };
+    }
+  );
+
+  server.get(
+    "/memos",
+    {
+      onRequest: [fastify.authenticate],
+      schema: {
+        description: "Get all available memos and policies",
+        tags: ["Documents"],
+      },
+    },
+    async () => {
+      return await documentService.getAllMemos();
+    }
+  );
+
+  server.post(
+    "/memos/upload",
+    {
+      onRequest: [fastify.authenticate],
+      schema: {
+        description: "Upload a new memo or policy to the central repository",
+        tags: ["Documents"],
+      },
+    },
+    async (request, reply) => {
+      const parts = request.parts();
+      let fileBuffer: Buffer | undefined;
+      let filename: string = "";
+      let mimetype: string = "";
+      const fields: Record<string, any> = {};
+
+      for await (const part of parts) {
+        if (part.type === "file") {
+          fileBuffer = await part.toBuffer();
+          filename = sanitizeFilename(part.filename);
+          mimetype = part.mimetype;
+        } else {
+          fields[part.fieldname] = part.value;
+        }
+      }
+
+      if (!fileBuffer) return reply.status(400).send({ message: "No file" });
+
+      const storagePath = `artifacts/${env.APP_ID}/public/memos/${filename}`;
+      const url = await documentService.uploadFile(Readable.from(fileBuffer), mimetype, storagePath);
+
+      await documentService.saveMemo({
+        title: fields.title || filename,
+        fileUrl: url,
+        type: fields.type || 'memo'
+      });
+
+      return { url, filename };
     }
   );
 }

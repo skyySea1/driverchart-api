@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { ExpirationAlertSchema } from "../../schemas/expirationSchema";
 import { driverService } from "../../services/driverService";
+import { emailService } from "../../services/emailService";
 import { z } from "zod";
 import dayjs from "dayjs";
 
@@ -58,6 +59,59 @@ export default async function (fastify: FastifyInstance) {
       });
 
       return alerts;
+    }
+  );
+
+  server.post(
+    "/send-notifications",
+    {
+      onRequest: [fastify.authenticate],
+      schema: {
+        description: "Send expiration notifications via Resend",
+        tags: ["Expiration"],
+        body: z.object({
+          notifications: z.array(
+            z.object({
+              driverId: z.string(),
+              driverName: z.string(),
+              email: z.string().email(),
+              documentType: z.string(),
+              dueDate: z.string(),
+              daysLeft: z.number(),
+            })
+          ),
+        }),
+        response: {
+          200: z.object({
+            success: z.boolean(),
+            sentCount: z.number(),
+          }),
+        },
+      },
+    },
+    async (request) => {
+      const { notifications } = request.body;
+
+      let sentCount = 0;
+      for (const notification of notifications) {
+        try {
+          await emailService.sendExpirationNotification(
+            notification.email,
+            notification.driverName,
+            notification.documentType,
+            notification.dueDate,
+            notification.daysLeft
+          );
+          sentCount++;
+        } catch (error) {
+          request.log.error(
+            { error, notification },
+            "Failed to send some notifications"
+          );
+        }
+      }
+
+      return { success: true, sentCount };
     }
   );
 }

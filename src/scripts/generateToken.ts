@@ -9,7 +9,7 @@ async function generateToken() {
 
   try {
     // 1. Create a Custom Token
-    const customToken = await auth.createCustomToken(uid, { role: "admin" });
+    const customToken = await auth.createCustomToken(uid, { role: "Admin" });
     console.log("Custom Token generated.");
 
     // 2. Exchange Custom Token for ID Token via Firebase Auth REST API
