@@ -1,15 +1,12 @@
 import { FastifyReply, FastifyRequest } from "fastify";
+import { DecodedIdToken } from "firebase-admin/auth";
 
 declare module "fastify" {
-  interface FastifyInstance {
+  export interface FastifyInstance {
     authenticate(request: FastifyRequest, reply: FastifyReply): Promise<void>;
   }
 
-  interface FastifyRequest {
-    user?: {
-      uid: string;
-      email?: string;
-      [key: string]: any;
-    };
+  export interface FastifyRequest {
+    user: DecodedIdToken;
   }
 }

@@ -59,6 +59,7 @@ describe("driverService", () => {
       hireDate: "",
       hireStatus: "Active",
       w9Signed: false,
+      isFlagged: false,
     };
 
     const id = await driverService.createDriver(newDriver);
@@ -98,6 +99,7 @@ describe("driverService", () => {
       hireDate: "",
       hireStatus: "Active",
       w9Signed: false,
+      isFlagged: false,
     };
 
     const id = await driverService.createDriver(duplicateDriver);

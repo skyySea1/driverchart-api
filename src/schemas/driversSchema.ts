@@ -5,6 +5,7 @@ export const ComplianceItemSchema = z.object({
   expiryDate: z.string().optional(),
   file: z.string().optional(),
 });
+
 export const DriverSchema = z.object({
   id: z.string().optional(),
   firstName: z.string().min(1, "First name is required"),
@@ -35,22 +36,31 @@ export const DriverSchema = z.object({
   ssnDocName: z.string().optional(),
 
   // Compliance Sections
-  license: ComplianceItemSchema.extend({
+  // flattened extension to avoid potential issues with deep partials on extended objects (rare but possible)
+  license: z.object({
+    documentNumber: z.string().default(""),
+    expiryDate: z.string().optional(),
+    file: z.string().optional(),
     state: z.string().default(""),
     value: z.string().optional(),
   }),
 
-  medical: ComplianceItemSchema.extend({
+  medical: z.object({
+    documentNumber: z.string().default(""),
+    expiryDate: z.string().optional(),
+    file: z.string().optional(),
     registry: z.string().optional().default(""),
   }),
 
   mvr: ComplianceItemSchema,
   drugAlcohol: ComplianceItemSchema,
 
-  roadTest: ComplianceItemSchema.extend({
+  roadTest: z.object({
+    documentNumber: z.string().default(""),
+    expiryDate: z.string().optional(),
+    file: z.string().optional(),
     examiner: z.string().default(""),
     date: z.string().optional(),
-    expiryDate: z.string().optional(),
   }),
 
   emergencyContact: z.object({
@@ -58,8 +68,14 @@ export const DriverSchema = z.object({
     phone: z.string().default(""),
     relationship: z.string().default(""),
   }),
+  
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
+
+  // Flagging
+  isFlagged: z.boolean().default(false),
+  flagReason: z.string().optional(),
+  flagDate: z.string().optional(),
 });
 
 export type Driver = z.infer<typeof DriverSchema>;

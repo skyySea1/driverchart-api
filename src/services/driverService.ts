@@ -54,9 +54,9 @@ export const driverService = {
 
     await docRef.set({
       ...validatedData,
-      id: id, // Store ID in the document
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      id: id, // Store ID in the document last to ensure it's not overwritten
     });
     return id;
   },

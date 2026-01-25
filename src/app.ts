@@ -11,7 +11,8 @@ import { corsPlugin } from "./plugins/corsPlugin";
 import { authPlugin } from "./plugins/authPlugin";
 import { swaggerPlugin } from "./plugins/swagger";
 
-// Routes
+// RoutesS
+import publicRoutes from "./routes/public";
 import driverRoutes from "./routes/drivers";
 import vehicleRoutes from "./routes/vehicles";
 import documentRoutes from "./routes/documents";
@@ -20,6 +21,7 @@ import applicationRoutes from "./routes/applications";
 import expirationRoutes from "./routes/expirations";
 import infoRoute from "./routes/info";
 import authRoutes from "./routes/auth";
+
 import { env } from "./utils/env";
 import { pinoConfig } from "./services/logger-service";
 import { AppError } from "./utils/errors";
@@ -80,6 +82,7 @@ export async function buildApp() {
   });
 
   // Register Routes
+  await fastify.register(publicRoutes, { prefix: "/api/public" });
   await fastify.register(authRoutes, { prefix: "/api/auth" });
   await fastify.register(driverRoutes, { prefix: "/api/drivers" });
   await fastify.register(vehicleRoutes, { prefix: "/api/vehicles" });
@@ -114,7 +117,6 @@ async function start() {
     process.exit(1);
   }
 }
-// review why api is sending self requests or maybe ping?
 // Only start if NOT in a Vercel AND NOT in test environment (external injection)
 if (!process.env.VERCEL && process.env.NODE_ENV !== "test") {
   start();

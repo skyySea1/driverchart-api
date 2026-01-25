@@ -9,9 +9,15 @@ export const userService = {
   async getAll(): Promise<User[]> {
     if (!COLLECTION_PATH) throw new Error("Invalid collection path");
     const snapshot = await db.collection(COLLECTION_PATH).get();
-    return snapshot.docs.map((doc) =>
-      UserSchema.parse({ id: doc.id, ...doc.data() })
-    );
+    const users: User[] = [];
+    snapshot.forEach(doc => {
+      try {
+        users.push(UserSchema.parse({ id: doc.id, ...doc.data() }));
+      } catch (e) {
+        console.warn(`Skipping invalid user doc ${doc.id}:`, e);
+      }
+    });
+    return users;
   },
 
   async getById(id: string): Promise<User | null> {
