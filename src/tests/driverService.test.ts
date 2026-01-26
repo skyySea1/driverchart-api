@@ -60,6 +60,20 @@ describe("driverService", () => {
       hireStatus: "Active",
       w9Signed: false,
       isFlagged: false,
+      drugTestSignature: "",
+      drugTestDate: "",
+      authReleaseSignature: "",
+      authReleaseDate: "",
+      pspDisclosureSignature: "",
+      pspDisclosureDate: "",
+      fmcsaConsentSignature: "",
+      fmcsaConsentDate: "",
+      alcoholDrugPolicySignature: "",
+      alcoholDrugPolicyDate: "",
+      generalWorkPolicySignature: "",
+      generalWorkPolicyDate: "",
+      fairCreditReportingSignature: "",
+      fairCreditReportingDate: "",
     };
 
     const id = await driverService.createDriver(newDriver);
@@ -100,6 +114,20 @@ describe("driverService", () => {
       hireStatus: "Active",
       w9Signed: false,
       isFlagged: false,
+      drugTestSignature: "",
+      drugTestDate: "",
+      authReleaseSignature: "",
+      authReleaseDate: "",
+      pspDisclosureSignature: "",
+      pspDisclosureDate: "",
+      fmcsaConsentSignature: "",
+      fmcsaConsentDate: "",
+      alcoholDrugPolicySignature: "",
+      alcoholDrugPolicyDate: "",
+      generalWorkPolicySignature: "",
+      generalWorkPolicyDate: "",
+      fairCreditReportingSignature: "",
+      fairCreditReportingDate: "",
     };
 
     const id = await driverService.createDriver(duplicateDriver);

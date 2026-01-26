@@ -15,6 +15,7 @@ export const envSchema = z.object({
   FIREBASE_STORAGE_BUCKET: z.string().optional(),
   APP_ID: z.string().default("dot-compliance-app"),
   RESEND_API_KEY: z.string().optional(),
+  RESEND_DOMAIN_VERIFIED: z.string().transform((v) => v === "true").optional().pipe(z.boolean().default(false)), // Defaults to false (test mode)
 })
 
 export const env = envSchema.parse(process.env)
