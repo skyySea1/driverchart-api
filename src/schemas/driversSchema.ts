@@ -22,7 +22,7 @@ export const DriverSchema = z.object({
   // Employment
   hireDate: z.string(),
   terminationDate: z.string().optional(),
-  hireStatus: z.enum(["Active", "Terminated", "Rehired"]).default("Active"),
+  hireStatus: z.enum(["Active", "Terminated", "Rehired", "Pending"]).default("Active"),
 
   // Banking / Tax / Legal
   bankName: z.string().optional(),
@@ -69,6 +69,27 @@ export const DriverSchema = z.object({
     relationship: z.string().default(""),
   }),
   
+  // Qualification Checklist (Permanent Tracking)
+  qualificationChecklist: z
+    .object({
+      dotApplication: z.boolean().default(false),
+      drivingRecordInquiry: z.boolean().default(false),
+      goodFaithEffort: z.boolean().default(false),
+      roadTest: z.boolean().default(false),
+      medicalCertificate: z.boolean().default(false),
+      medicalRegistryVerification: z.boolean().default(false),
+      annualDrivingReview: z.boolean().default(false),
+      cdlisReport: z.boolean().default(false),
+      drugAlcoholClearinghouse: z.boolean().default(false),
+      preEmploymentDrugTest: z.boolean().default(false),
+      randomProgramPlacement: z.boolean().default(false),
+      companyTestingPolicyReceipt: z.boolean().default(false),
+      drugAlcoholStatement: z.boolean().default(false),
+      // Completion timestamps
+      completedAt: z.record(z.string(), z.string()).optional(),
+    })
+    .optional(),
+
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
 
@@ -76,6 +97,27 @@ export const DriverSchema = z.object({
   isFlagged: z.boolean().default(false),
   flagReason: z.string().optional(),
   flagDate: z.string().optional(),
-});
+
+  // Application Reference
+  applicationId: z.string().optional(),
+  appliedDate: z.string().optional(),
+  applicationFile: z.string().optional(),
+
+  // Application Signatures (preserved during migration)
+  drugTestSignature: z.string().optional().default(""),
+  drugTestDate: z.string().optional().default(""),
+  authReleaseSignature: z.string().optional().default(""),
+  authReleaseDate: z.string().optional().default(""),
+  pspDisclosureSignature: z.string().optional().default(""),
+  pspDisclosureDate: z.string().optional().default(""),
+  fmcsaConsentSignature: z.string().optional().default(""),
+  fmcsaConsentDate: z.string().optional().default(""),
+  alcoholDrugPolicySignature: z.string().optional().default(""),
+  alcoholDrugPolicyDate: z.string().optional().default(""),
+  generalWorkPolicySignature: z.string().optional().default(""),
+  generalWorkPolicyDate: z.string().optional().default(""),
+  fairCreditReportingSignature: z.string().optional().default(""),
+  fairCreditReportingDate: z.string().optional().default(""),
+})
 
 export type Driver = z.infer<typeof DriverSchema>;
