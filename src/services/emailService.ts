@@ -2,7 +2,22 @@ import { Resend } from "resend";
 import { env } from "../utils/env";
 import { logger } from "../services/logger-service";
 
-const resend = new Resend(env.RESEND_API_KEY || "re_123456789"); // Fallback for dev
+const resend = new Resend(env.RESEND_API_KEY);
+
+const SENDER_EMAIL = "onboarding@resend.dev"; // For testing without domain
+const TEST_RECIPIENT = "henrir1020@gmail.com"; // User mandated test email
+
+// Helper to determine recipient
+function getRecipient(originalTo: string): string {
+  // In production with verified domain, use originalTo.
+  // BUT user explicitly asked to use this specific restricted setup for now.
+  // We will log the original intended recipient.
+  if (process.env.NODE_ENV !== 'production' || !env.RESEND_DOMAIN_VERIFIED) {
+     logger.info(`[Email Test Mode] Redirecting email from ${originalTo} to ${TEST_RECIPIENT}`);
+     return TEST_RECIPIENT;
+  }
+  return originalTo;
+}
 
 export const emailService = {
   async sendExpirationNotification(
@@ -21,10 +36,11 @@ export const emailService = {
       const isExpired = daysLeft < 0;
       const statusText = isExpired ? "expired" : "is expiring soon";
       const subject = `Attention: Your ${documentType} ${statusText}`;
+      const recipient = getRecipient(to);
 
       const { data, error } = await resend.emails.send({
-        from: "CharterSafe <notifications@chartersafe.app>", // Update with verified domain
-        to: [to],
+        from: SENDER_EMAIL,
+        to: [recipient],
         subject: subject,
         html: `
           <div style="font-family: sans-serif; padding: 20px; color: #334155;">
@@ -38,6 +54,7 @@ export const emailService = {
             <p>Please update your document as soon as possible to maintain compliance.</p>
             <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
             <p style="font-size: 0.875rem; color: #64748b;">This is an automated message from CharterSafe Compliance System.</p>
+            <p style="font-size: 0.7rem; color: #94a3b8; margin-top: 20px;">Intended Recipient: ${to}</p>
           </div>
         `,
       });
@@ -58,19 +75,28 @@ export const emailService = {
     to: string,
     driverName: string,
     requestType: string,
-    magicLink: string
+    magicLink: string,
+    customMessage?: string
   ) {
     if (!env.RESEND_API_KEY) return;
 
     try {
+      const recipient = getRecipient(to);
       const { data, error } = await resend.emails.send({
-        from: "CharterSafe <notifications@chartersafe.app>",
-        to: [to],
+        from: SENDER_EMAIL,
+        to: [recipient],
         subject: `Document Request: ${requestType}`,
         html: `
           <div style="font-family: sans-serif; padding: 20px; color: #334155;">
             <h2 style="color: #1e293b;">Hello ${driverName},</h2>
             <p>We need you to provide a copy of your <strong>${requestType}</strong> to maintain your compliance records.</p>
+            ${
+              customMessage
+                ? `<div style="background-color: #f8fafc; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0; font-style: italic; color: #475569;">
+                     "${customMessage.replace(/\n/g, '<br/>')}"
+                   </div>`
+                : ""
+            }
             <p>You can upload it directly by clicking the secure link below:</p>
             <div style="margin: 30px 0;">
               <a href="${magicLink}" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
@@ -78,6 +104,7 @@ export const emailService = {
               </a>
             </div>
             <p style="font-size: 0.875rem; color: #64748b;">This link is secure and unique to your profile. If you have any questions, please contact the dispatcher.</p>
+            <p style="font-size: 0.7rem; color: #94a3b8; margin-top: 20px;">Intended Recipient: ${to}</p>
           </div>
         `,
       });
@@ -106,9 +133,10 @@ export const emailService = {
         )
         .join("");
 
+      const recipient = getRecipient(to);
       const { data, error } = await resend.emails.send({
-        from: "CharterSafe <notifications@chartersafe.app>",
-        to: [to],
+        from: SENDER_EMAIL,
+        to: [recipient],
         subject: `New Memo: ${memoTitle}`,
         html: `
           <div style="font-family: sans-serif; padding: 20px; color: #334155;">
@@ -118,6 +146,7 @@ export const emailService = {
               ${linksHtml}
             </ul>
             <p>Please review these documents at your earliest convenience. You can also find them in your driver profile registry.</p>
+            <p style="font-size: 0.7rem; color: #94a3b8; margin-top: 20px;">Intended Recipient: ${to}</p>
           </div>
         `,
       });
