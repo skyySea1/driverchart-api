@@ -60,7 +60,7 @@ export const applicationService = {
         ...validatedData,
         id: id, // Store ID in the document
         createdAt: new Date().toISOString(),
-        status: "Pending",
+        status: validatedData.status || "New",
       });
       logger.info("[ApplicationService] Document saved to Firestore");
       return id;
