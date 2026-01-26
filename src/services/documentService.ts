@@ -92,5 +92,68 @@ export const documentService = {
   async getAllMemos(): Promise<any[]> {
     const snapshot = await db.collection(MEMOS_PATH).orderBy('createdAt', 'desc').get();
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  },
+
+  async deleteMemo(id: string): Promise<void> {
+    if (!id) throw new Error("Invalid ID");
+    await db.collection(MEMOS_PATH).doc(id).delete();
+  },
+
+  async copyFile(sourcePath: string, destPath: string): Promise<string> {
+    const bucket = storage.bucket();
+    // Clean paths
+    // Firebase storage paths often include the bucket prefix? No, usually just object path.
+    // If the URL is full, we might need to extract path. But here we assume internal path usage.
+    
+    // Safety check: ensure paths don't start with /
+    const safeSource = sourcePath.startsWith('/') ? sourcePath.slice(1) : sourcePath;
+    const safeDest = destPath.startsWith('/') ? destPath.slice(1) : destPath;
+
+    const sourceFile = bucket.file(safeSource);
+    const destFile = bucket.file(safeDest);
+
+    // Copy the file
+    await sourceFile.copy(destFile);
+
+    // Make the destination public to get a URL
+    await destFile.makePublic();
+    
+    return destFile.publicUrl();
+  },
+
+  getStoragePathFromUrl(url: string): string {
+    if (!url) return "";
+    try {
+       // Handle Firebase Storage URLs
+       // Format: https://storage.googleapis.com/BUCKET_NAME/OBJECT_PATH
+       // or http://localhost:9199/v0/b/BUCKET_NAME/o/OBJECT_PATH?token=...
+       
+       const decoded = decodeURIComponent(url);
+       
+       // Handle Emulator/Local
+       if (decoded.includes("/o/")) {
+         const path = decoded.split("/o/")[1];
+         return path.split("?")[0];
+       }
+       
+       // Handle Production (assuming standard public URL format logic if different)
+       // Usually: https://storage.googleapis.com/bucket/path/to/file
+       // But makePublic() returns a specific format.
+       // Let's assume the path starts after the bucket name if accessible, or we use a known prefix?
+       // This is tricky without knowing the exact URL structure returned by `publicUrl()`.
+       // `file.publicUrl()` usually returns `https://storage.googleapis.com/${bucket.name}/${file.name}`
+       
+       // Heuristic: Remove domain and bucket if possible
+       const parts = decoded.split("/");
+       // Find known prefix "artifacts"
+       const artifactIndex = parts.indexOf("artifacts");
+       if (artifactIndex !== -1) {
+          return parts.slice(artifactIndex).join("/").split("?")[0];
+       }
+       
+       return "";
+    } catch (e) {
+      return "";
+    }
   }
 };
