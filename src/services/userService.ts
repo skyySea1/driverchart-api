@@ -20,6 +20,13 @@ export const userService = {
     return users;
   },
 
+async getCurrentUser(uid: string): Promise<User | null> {
+    if (!uid) throw new Error("Invalid UID");
+    const doc = await db.collection(COLLECTION_PATH).doc(uid).get();
+    if (!doc.exists) return null;
+    return UserSchema.parse({ id: doc.id, ...doc.data() });
+  },
+
   async getById(id: string): Promise<User | null> {
     if (!id) throw new Error("Invalid ID");
     const doc = await db.collection(COLLECTION_PATH).doc(id).get();
