@@ -13,7 +13,6 @@ const PersonalInfoSchema = z.object({
   ),
   ssnNumber: z
     .string()
-    // TODO: Add strict SSN regex validation (format XXX-XX-XXXX).
     .or(z.literal("")),
   medicalExpirationDate: z.string().optional(),
 });
@@ -114,7 +113,6 @@ export const ApplicationSchema = z.object({
   mvr: z.string().optional().or(z.null()),
   drugAlcohol: z.string().optional().or(z.null()),
   roadTest: z.string().optional().or(z.null()),
-  ssnDoc: z.string().optional().or(z.null()),
   drugTestPositiveOrRefusal: z.boolean().default(false),
   drugTestDocumentation: z.enum(["Yes", "No", "N/A"]).default("N/A"),
   drugTestSignature: z.string().optional().default(""),

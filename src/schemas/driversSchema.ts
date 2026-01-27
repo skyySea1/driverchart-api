@@ -32,8 +32,6 @@ export const DriverSchema = z.object({
   businessName: z.string().optional(),
   taxClassification: z.string().optional(),
   i9EmployerSignature: z.string().optional(),
-  ssnDoc: z.string().optional(),
-  ssnDocName: z.string().optional(),
 
   // Compliance Sections
   // flattened extension to avoid potential issues with deep partials on extended objects (rare but possible)
