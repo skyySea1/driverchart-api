@@ -40,3 +40,6 @@ __screenshots__/
 .env*.local
 
 token.txt
+decoded-key.pem
+test-creds.ts
+test-firestore.ts
