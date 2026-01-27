@@ -1,3 +1,4 @@
+// src/plugins/corsPlugin.ts
 import { FastifyInstance } from "fastify";
 import fp from "fastify-plugin";
 import cors from "@fastify/cors";
@@ -6,8 +7,7 @@ import cors from "@fastify/cors";
 export const corsPlugin = fp(async (fastify: FastifyInstance) => {
   await fastify.register(cors, {
     origin: "*",
-    // todo Allow all origins - pending change for production
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
   });
 });

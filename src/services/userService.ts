@@ -5,16 +5,26 @@ import { env } from "../utils/env";
 const APP_ID = env.APP_ID;
 const COLLECTION_PATH = `artifacts/${APP_ID}/public/data/users`;
 
-// added schema parsing to ensure data integrity and validation
-// todo add error handling for create and update operations
-
 export const userService = {
   async getAll(): Promise<User[]> {
     if (!COLLECTION_PATH) throw new Error("Invalid collection path");
     const snapshot = await db.collection(COLLECTION_PATH).get();
-    return snapshot.docs.map((doc) =>
-      UserSchema.parse({ id: doc.id, ...doc.data() })
-    );
+    const users: User[] = [];
+    snapshot.forEach(doc => {
+      try {
+        users.push(UserSchema.parse({ id: doc.id, ...doc.data() }));
+      } catch (e) {
+        console.warn(`Skipping invalid user doc ${doc.id}:`, e);
+      }
+    });
+    return users;
+  },
+
+async getCurrentUser(uid: string): Promise<User | null> {
+    if (!uid) throw new Error("Invalid UID");
+    const doc = await db.collection(COLLECTION_PATH).doc(uid).get();
+    if (!doc.exists) return null;
+    return UserSchema.parse({ id: doc.id, ...doc.data() });
   },
 
   async getById(id: string): Promise<User | null> {
@@ -40,11 +50,71 @@ export const userService = {
   async createUser(data: User): Promise<string> {
     if (!data) throw new Error("Invalid user data");
     const validatedData = UserSchema.parse(data);
-    const docRef = await db.collection(COLLECTION_PATH).add({
-      ...validatedData,
-      createdAt: new Date().toISOString(),
+
+    // 1. Create in Firebase Auth
+    if (!validatedData.password) {
+      throw new Error("Password is required for new users");
+    }
+
+    const authUser = await auth.createUser({
+      email: validatedData.email,
+      password: validatedData.password,
+      displayName: validatedData.name,
     });
-    return docRef.id;
+
+    // 2. Set Role Claim
+    await auth.setCustomUserClaims(authUser.uid, { role: validatedData.role });
+
+    // 3. Create in Firestore (using Auth UID as ID)
+    // Remove password from object before saving to DB
+    const { password, ...userData } = validatedData;
+    
+    await db.collection(COLLECTION_PATH).doc(authUser.uid).set({
+      ...userData,
+      id: authUser.uid,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+
+    return authUser.uid;
+  },
+
+  async updateUser(id: string, data: Partial<User>): Promise<void> {
+    if (!id) throw new Error("Invalid ID");
+    
+    // Zod Partial Parse
+    const validatedData = UserSchema.partial().parse(data);
+    const { password, ...dbData } = validatedData;
+
+    // 1. Update Auth (if sensitive data changed)
+    if (password || dbData.email || dbData.name) {
+        await auth.updateUser(id, {
+            email: dbData.email,
+            password: password,
+            displayName: dbData.name
+        });
+    }
+
+    // 2. Update Role Claim (if changed)
+    if (dbData.role) {
+        await auth.setCustomUserClaims(id, { role: dbData.role });
+    }
+
+    // 3. Update Firestore
+    await db.collection(COLLECTION_PATH).doc(id).update({
+      ...dbData,
+      updatedAt: new Date().toISOString(),
+    });
+  },
+
+  async deleteUser(id: string): Promise<void> {
+    if (!id) throw new Error("Invalid ID");
+
+    // 1. Delete from Auth
+    await auth.deleteUser(id);
+
+    // 2. Delete from Firestore
+    await db.collection(COLLECTION_PATH).doc(id).delete();
   },
 
   async setUserRole(uid: string, role: string): Promise<void> {

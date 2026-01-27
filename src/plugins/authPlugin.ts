@@ -1,3 +1,4 @@
+// src/plugins/authPlugin.ts
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import fp from "fastify-plugin";
 import { auth } from "../services/firebaseService";
