@@ -24,6 +24,27 @@ export default async function (fastify: FastifyInstance) {
     }
   );
 
+  server.get(
+    "/currentUser",
+    {
+      onRequest: [fastify.authenticate],
+      schema: {
+        description: "Get current user",
+        tags: ["Users"],
+        response: {
+          200: UserSchema,
+          404: z.object({ message: z.string() }),
+        },
+      },
+    },
+    async (request, reply) => {
+      const user = await userService.getCurrentUser(request.user.uid);
+      if (!user) {
+        return reply.status(404).send({ message: "User not found" });
+      }
+      return user;
+    }
+  );
   server.post(
     "/",
     {

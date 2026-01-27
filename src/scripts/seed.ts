@@ -5,12 +5,9 @@ import { userService } from "../services/userService";
 import { db } from "../services/firebaseService";
 import { env } from "../utils/env";
 import dayjs from "dayjs";
-import { Driver } from "@/schemas/driversSchema";
-import { Application } from "@/schemas/applicationSchema";
-import { User } from "@/schemas/usersSchema";
+import { faker } from '@faker-js/faker';
 
-// --- Seed Data ---
-
+// Default Users
 const users: any[] = [
   {
     name: "Admin User",
@@ -32,111 +29,80 @@ const users: any[] = [
   },
 ];
 
-const drivers: any[] = [
-  // 1. Active Driver - Fully Compliant
-  {
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@example.com",
-    phone: "(555) 123-4567",
-    dob: "1985-05-15",
-    ssnNumber: "123-00-4567",
-    address: "123 Maple St",
-    city: "Orlando",
-    state: "FL",
-    zip: "32801",
-    hireDate: "2023-01-10",
-    hireStatus: "Active",
+// Helper to generate random driver
+const generateDriver = (index: number) => {
+  const hireStatus = faker.helpers.arrayElement(['Active', 'Terminated', 'Pending', 'Rehired']);
+  const isActive = hireStatus === 'Active' || hireStatus === 'Rehired';
+  
+  return {
+    firstName: faker.person.firstName(),
+    middleName: faker.person.middleName(),
+    lastName: faker.person.lastName(),
+    email: faker.internet.email().toLowerCase(), // normalize email
+    phone: faker.phone.number(),
+    dob: dayjs(faker.date.birthdate({ min: 21, max: 65, mode: 'age' })).format('YYYY-MM-DD'),
+    ssnNumber: faker.string.numeric(9).replace(/(\d{3})(\d{2})(\d{4})/, '$1-$2-$3'),
+    address: faker.location.streetAddress(),
+    city: faker.location.city(),
+    state: faker.location.state({ abbreviated: true }),
+    zip: faker.location.zipCode(),
+    hireDate: dayjs(faker.date.past({ years: 3 })).format('YYYY-MM-DD'),
+    hireStatus,
     license: {
-      documentNumber: "D12345678",
-      state: "FL",
-      expiryDate: dayjs().add(2, "year").format("YYYY-MM-DD"), // Valid
-      file: "https://example.com/license.pdf",
+      documentNumber: faker.string.alphanumeric(9).toUpperCase(),
+      state: faker.location.state({ abbreviated: true }),
+      expiryDate: isActive ? dayjs().add(faker.number.int({ min: 1, max: 24 }), 'month').format('YYYY-MM-DD') : dayjs().subtract(faker.number.int({ min: 1, max: 12 }), 'month').format('YYYY-MM-DD'),
+      file: Math.random() > 0.3 ? `https://example.com/license-${index}.pdf` : undefined,
     },
     medical: {
-      documentNumber: "M987654321",
-      registry: "1234567890",
-      expiryDate: dayjs().add(6, "month").format("YYYY-MM-DD"), // Valid
+      documentNumber: faker.string.alphanumeric(10).toUpperCase(),
+      registry: faker.string.numeric(10),
+      expiryDate: isActive ? dayjs().add(faker.number.int({ min: 1, max: 12 }), 'month').format('YYYY-MM-DD') : dayjs().subtract(faker.number.int({ min: 1, max: 6 }), 'month').format('YYYY-MM-DD'),
+       file: Math.random() > 0.4 ? `https://example.com/medical-${index}.pdf` : undefined,
     },
     mvr: {
-      documentNumber: "MVR-2024",
-      expiryDate: dayjs().add(3, "month").format("YYYY-MM-DD"), // Valid
+      documentNumber: `MVR-${dayjs().year()}-${index}`,
+      expiryDate: dayjs().add(faker.number.int({ min: 3, max: 12 }), 'month').format('YYYY-MM-DD'),
+      file: Math.random() > 0.5 ? `https://example.com/mvr-${index}.pdf` : undefined,
     },
     drugAlcohol: {
-      documentNumber: "DA-2024",
-      expiryDate: dayjs().add(10, "month").format("YYYY-MM-DD"), // Valid
+      documentNumber: `DA-${dayjs().year()}-${index}`,
+      expiryDate: dayjs().add(faker.number.int({ min: 6, max: 12 }), 'month').format('YYYY-MM-DD'),
+      file: Math.random() > 0.5 ? `https://example.com/drug-${index}.pdf` : undefined,
     },
     roadTest: {
-      examiner: "Jane Smith",
-      date: "2023-01-05",
-      expiryDate: dayjs().add(2, "year").format("YYYY-MM-DD"),
+      documentNumber: `RT-${dayjs().year()}-${index}`,
+      examiner: faker.person.fullName(),
+      date: dayjs(faker.date.past({ years: 1 })).format('YYYY-MM-DD'),
+      expiryDate: dayjs().add(2, 'year').format('YYYY-MM-DD'),
+      file: Math.random() > 0.6 ? `https://example.com/roadtest-${index}.pdf` : undefined,
     },
     emergencyContact: {
-      name: "Jane Doe",
-      phone: "(555) 987-6543",
-      relationship: "Spouse",
+      name: faker.person.fullName(),
+      phone: faker.phone.number(),
+      relationship: faker.helpers.arrayElement(['Spouse', 'Parent', 'Sibling', 'Friend']),
     },
-  },
-  // 2. Terminated Driver - Documents Expiring Soon
-  {
-    firstName: "Robert",
-    lastName: "Smith",
-    email: "robert.smith@example.com",
-    phone: "(555) 222-3333",
-    dob: "1990-08-20",
-    ssnNumber: "222-00-3333",
-    address: "456 Oak Ave",
-    city: "Miami",
-    state: "FL",
-    zip: "33101",
-    hireDate: "2023-03-22",
-    hireStatus: "Terminated",
-    license: {
-      documentNumber: "S55566677",
-      state: "FL",
-      expiryDate: dayjs().add(15, "day").format("YYYY-MM-DD"), // Expiring Soon (<30 days)
-    },
-    medical: {
-      expiryDate: dayjs().subtract(1, "day").format("YYYY-MM-DD"), // Expired
-    },
-    mvr: {},
-    drugAlcohol: {},
-    roadTest: {},
-    emergencyContact: {
-      name: "Bob Smith Sr",
-      phone: "(555) 111-2222",
-      relationship: "Father",
-    },
-  },
-  // 3. Pending Driver (Pre-Hire) - Shadow Record
-  {
-    firstName: "Michael",
-    lastName: "Jordan",
-    email: "mj@example.com",
-    phone: "(555) 232-2323",
-    dob: "1988-02-17",
-    ssnNumber: "333-00-4444",
-    address: "23 Bull Run",
-    city: "Chicago",
-    state: "IL",
-    zip: "60601",
-    hireDate: dayjs().format("YYYY-MM-DD"),
-    hireStatus: "Pending", // PENDING STATUS
-    license: {
-      documentNumber: "J23232323",
-      state: "IL",
-      expiryDate: dayjs().add(1, "year").format("YYYY-MM-DD"),
-    },
-    medical: {
-      expiryDate: dayjs().add(1, "year").format("YYYY-MM-DD"),
-    },
-    mvr: {},
-    drugAlcohol: {},
-    roadTest: {},
-    emergencyContact: {},
-    notes: "Awaiting drug test results.",
-  },
-];
+    isFlagged: Math.random() > 0.9,
+    flagReason: Math.random() > 0.9 ? "Pending safety review" : "",
+    
+    // New fields
+    w9Signed: faker.datatype.boolean(),
+    drugTestSignature: faker.person.fullName(),
+    drugTestDate: dayjs(faker.date.past()).format('YYYY-MM-DD'),
+    authReleaseSignature: faker.person.fullName(),
+    authReleaseDate: dayjs(faker.date.past()).format('YYYY-MM-DD'),
+    pspDisclosureSignature: faker.person.fullName(),
+    pspDisclosureDate: dayjs(faker.date.past()).format('YYYY-MM-DD'),
+    fmcsaConsentSignature: faker.person.fullName(),
+    fmcsaConsentDate: dayjs(faker.date.past()).format('YYYY-MM-DD'),
+    alcoholDrugPolicySignature: faker.person.fullName(),
+    alcoholDrugPolicyDate: dayjs(faker.date.past()).format('YYYY-MM-DD'),
+    generalWorkPolicySignature: faker.person.fullName(),
+    generalWorkPolicyDate: dayjs(faker.date.past()).format('YYYY-MM-DD'),
+    fairCreditReportingSignature: faker.person.fullName(),
+    fairCreditReportingDate: dayjs(faker.date.past()).format('YYYY-MM-DD'),
+  };
+};
 
 const vehicles: any[] = [
   {
@@ -150,185 +116,94 @@ const vehicles: any[] = [
     busNumber: "102",
     vin: "2HGCM82633A009988",
     vehicleStatus: "Maintenance",
-    lastAnnualInspection: dayjs().subtract(13, "month").format("YYYY-MM-DD"), // Overdue
+    lastAnnualInspection: dayjs().subtract(13, "month").format("YYYY-MM-DD"),
     mileage: 22000,
   },
+  {
+      busNumber: "103",
+      vin: "3HGCM82633A001122",
+      vehicleStatus: "Active",
+      lastAnnualInspection: dayjs().subtract(1, "month").format("YYYY-MM-DD"),
+      mileage: 5000,
+  },
+   {
+      busNumber: "201",
+      vin: "4HGCM82633A003344",
+      vehicleStatus: "Inactive",
+      lastAnnualInspection: dayjs().subtract(24, "month").format("YYYY-MM-DD"),
+      mileage: 150000,
+  }
 ];
 
-const applications: any[] = [
-  // 1. New Application
-  {
-    status: "New",
-    appliedDate: dayjs().format("YYYY-MM-DD"),
+const generateApplication = () => {
+   const status = faker.helpers.arrayElement(['New', 'Pending', 'Hired', 'Rejected']);
+   
+   return {
+    status: status as "New" | "Pending" | "Hired" | "Rejected",
+    appliedDate: dayjs(faker.date.recent({ days: 60 })).format("YYYY-MM-DD"),
     personalInfo: {
-      firstName: "Alice",
-      lastName: "Wonderland",
-      dob: "1995-04-12",
-      email: "alice@example.com",
-      phone: "(555) 777-8888",
-      ssnNumber: "999-00-1111",
+      firstName: faker.person.firstName(),
+      middleName: faker.person.middleName(),
+      lastName: faker.person.lastName(),
+      dob: dayjs(faker.date.birthdate({ min: 21, max: 60, mode: 'age' })).format('YYYY-MM-DD'),
+      email: faker.internet.email().toLowerCase(),
+      phone: faker.phone.number(),
+      ssnNumber: faker.string.numeric(9).replace(/(\d{3})(\d{2})(\d{4})/, '$1-$2-$3'),
       medicalExpirationDate: dayjs().add(1, "year").format("YYYY-MM-DD"),
     },
     addresses: [
       {
-        street: "1 Rabbit Hole",
-        city: "Wonderland",
-        state: "FL",
-        zip: "32000",
+        street: faker.location.streetAddress(),
+        city: faker.location.city(),
+        state: faker.location.state({ abbreviated: true }),
+        zip: faker.location.zipCode(),
         fromDate: "2020-01-01",
         present: true,
       },
     ],
     licenses: [
       {
-        number: "W111222333",
-        state: "FL",
-        class: "B",
+        number: faker.string.alphanumeric(9).toUpperCase(),
+        state: faker.location.state({ abbreviated: true }),
+        class: faker.helpers.arrayElement(['A', 'B', 'C']),
         expirationDate: dayjs().add(2, "year").format("YYYY-MM-DD"),
+        endorsements: faker.helpers.arrayElement(['P', 'S', 'N', '']),
+        restrictions: "",
       },
     ],
     employmentHistory: [],
     accidents: [],
     violations: [],
-  },
-  // 2. Pending Application (Linked to Michael Jordan - though IDs won't link automatically in seed unless we forced it, distinct records are fine for demo)
-  {
-    status: "New",
-    appliedDate: dayjs().subtract(5, "day").format("YYYY-MM-DD"),
-    personalInfo: {
-      firstName: "Michael",
-      lastName: "Jordan", // Matches Pending Driver
-      dob: "1988-02-17",
-      email: "mj@example.com",
-      phone: "(555) 232-2323",
-      ssnNumber: "333-00-4444",
-    },
-    addresses: [
-      {
-        street: "23 Bull Run",
-        city: "Chicago",
-        state: "IL",
-        zip: "60601",
-        fromDate: "2010-01-01",
-        present: true,
-      },
-    ],
-    licenses: [
-      {
-        number: "J23232323",
-        state: "IL",
-        class: "A",
-        expirationDate: dayjs().add(1, "year").format("YYYY-MM-DD"),
-      },
-    ],
-    employmentHistory: [],
-    accidents: [],
-    violations: [],
-    notes: "Moved to new, await verification.",
-  },
-  // 3. Rejected Application
-  {
-    status: "Rejected",
-    appliedDate: dayjs().subtract(10, "day").format("YYYY-MM-DD"),
-    personalInfo: {
-      firstName: "Bad",
-      lastName: "Driver",
-      dob: "2000-01-01",
-      email: "bad@example.com",
-      phone: "(555) 666-6666",
-      ssnNumber: "666-00-6666",
-    },
-    addresses: [
-      {
-        street: "666 Hell St",
-        city: "Nowhere",
-        state: "NY",
-        zip: "00000",
-        fromDate: "2010-01-01",
-        present: true,
-      },
-    ],
-    licenses: [
-      {
-        number: "BAD-666",
-        state: "NY",
-        class: "C",
-        expirationDate: dayjs().add(5, "year").format("YYYY-MM-DD"),
-      },
-    ],
-    notes: "Multiple recent accidents.",
-  },
-
-  {
-    status: "New",
-    appliedDate: dayjs().format("YYYY-MM-DD"),
-    personalInfo: {
-      firstName: "Neyman",
-      lastName: "Jr",
-      dob: "1995-04-12",
-      email: "neyman@example.com",
-      phone: "(555) 777-8888",
-      ssnNumber: "999-00-1111",
-      medicalExpirationDate: dayjs().add(1, "year").format("YYYY-MM-DD"),
-    },
-    addresses: [
-      {
-        street: "1 Narnia",
-        city: "Wonderland",
-        state: "FL",
-        zip: "32000",
-        fromDate: "2020-01-01",
-        present: true,
-      },
-    ],
-    licenses: [
-      {
-        number: "W111222333",
-        state: "FL",
-        class: "B",
-        expirationDate: dayjs().add(2, "year").format("YYYY-MM-DD"),
-      },
-    ],
-    employmentHistory: [],
-    accidents: [],
-    violations: [],
-  },
-
-  {
-    status: "Hired",
-    appliedDate: dayjs().format("YYYY-MM-DD"),
-    personalInfo: {
-      firstName: "Messi",
-      lastName: "Pelé",
-      dob: "1995-04-12",
-      email: "messi@example.com",
-      phone: "(555) 777-8888",
-      ssnNumber: "999-00-1111",
-      medicalExpirationDate: dayjs().add(1, "year").format("YYYY-MM-DD"),
-    },
-    addresses: [
-      {
-        street: "1 Rabbit Hole",
-        city: "Wonderland",
-        state: "FL",
-        zip: "32000",
-        fromDate: "2020-01-01",
-        present: true,
-      },
-    ],
-    licenses: [
-      {
-        number: "W111222333",
-        state: "FL",
-        class: "B",
-        expirationDate: dayjs().add(2, "year").format("YYYY-MM-DD"),
-      },
-    ],
-    employmentHistory: [],
-    accidents: [],
-    violations: [],
-  },
-];
+    vehicleExperience: [],
+    notes: status === 'Rejected' ? "Does not meet experience requirements" : "",
+    
+    // New fields
+    forfeitures: "",
+    deniedLicense: false,
+    suspendedLicense: false,
+    denialSuspensionExplanation: "",
+    drugTestPositiveOrRefusal: false,
+    drugTestDocumentation: "N/A" as "N/A" | "Yes" | "No",
+    drugTestSignature: "",
+    drugTestDate: "",
+    authReleaseSignature: "",
+    authReleaseDate: "",
+    pspDisclosureSignature: "",
+    pspDisclosureDate: "",
+    fmcsaConsentSignature: "",
+    fmcsaConsentDate: "",
+    alcoholDrugPolicySignature: "",
+    alcoholDrugPolicyDate: "",
+    generalWorkPolicySignature: "",
+    generalWorkPolicyDate: "",
+    fairCreditReportingSignature: "",
+    fairCreditReportingDate: "",
+    
+    isFlagged: false,
+    flagReason: "",
+    flagDate: "",
+  };
+}
 
 async function seed() {
   console.log(`Seeding data for APP_ID: ${env.APP_ID}...`);
@@ -340,59 +215,27 @@ async function seed() {
       const existingInFirestore = await userService.getByEmail(u.email);
 
       if (existingInFirestore && existingInFirestore.id) {
-        console.log(
-          `User ${u.email} exists in Firestore. Ensuring role is ${u.role}...`
-        );
-        try {
-          await userService.updateUser(existingInFirestore.id, {
-            role: u.role,
-          });
-        } catch (err: any) {
-          if (
-            err.code === "auth/user-not-found" ||
-            err.message?.includes("no user record")
-          ) {
-            console.log(
-              `User ${u.email} found in Firestore but MISSING in Auth. Re-creating...`
-            );
-            // Delete orphaned firestore doc
-            await db
-              .collection(`artifacts/${env.APP_ID}/public/data/users`)
-              .doc(existingInFirestore.id as string)
-              .delete();
-            // Create fresh
-            await userService.createUser(u);
-            console.log(`Re-created user: ${u.email}`);
-          } else {
-            throw err;
-          }
+        console.log(`User ${u.email} exists in Firestore. updating role...`);
+         try {
+          await userService.updateUser(existingInFirestore.id, { role: u.role });
+        } catch (e: any) {
+           console.log(`Error updating user ${u.email}: ${e.message}`);
         }
       } else {
-        // Check if exists in Auth but not Firestore
         try {
-          // Note: userService doesn't expose auth directly, but we can try to create
-          // if it fails with 'already exists', we know we need to sync
           await userService.createUser(u);
           console.log(`Created new user: ${u.email} (${u.role})`);
         } catch (err: any) {
-          if (
-            err.code === "auth/email-already-exists" ||
-            err.message?.includes("already exists")
-          ) {
-            console.log(
-              `User ${u.email} exists in Auth. You may need to manually update their Firestore doc if it is missing.`
-            );
-            // Ideally we'd sync here, but let's stick to the easiest path for the user
-          } else {
-            console.error(`Error with user ${u.email}:`, err.message);
-          }
+             console.log(`Error creating user ${u.email}: ${err.message}`);
         }
       }
     }
 
-    // 2. Seed Drivers
+    // 2. Seed Drivers (Generate 20)
     console.log("Seeding Drivers...");
-    for (const d of drivers) {
+    const driversToSeed = Array.from({ length: 20 }, (_, i) => generateDriver(i));
+    
+    for (const d of driversToSeed) {
       const existing = await driverService.getAll();
       const exists = existing.some((ed) => ed.email === d.email);
 
@@ -408,9 +251,7 @@ async function seed() {
     console.log("Seeding Vehicles...");
     for (const v of vehicles) {
       const existingVehicles = await vehicleService.getAll();
-      const exists = existingVehicles.some(
-        (ev) => ev.busNumber === v.busNumber
-      );
+      const exists = existingVehicles.some((ev) => ev.busNumber === v.busNumber);
 
       if (!exists) {
         await vehicleService.createVehicle(v);
@@ -420,24 +261,19 @@ async function seed() {
       }
     }
 
-    // 4. Seed Applications
+    // 4. Seed Applications (Generate 20)
     console.log("Seeding Applications...");
-    for (const a of applications) {
-      // Basic check to avoid infinite dupes on re-run
+    const appsToSeed = Array.from({ length: 20 }, () => generateApplication());
+    
+    for (const a of appsToSeed) {
       const existingApps = await applicationService.getAll();
-      const exists = existingApps.some(
-        (ea) => ea.personalInfo.email === a.personalInfo.email
-      );
+      const exists = existingApps.some((ea) => ea.personalInfo.email === a.personalInfo.email);
 
       if (!exists) {
         await applicationService.create(a);
-        console.log(
-          `Created application: ${a.personalInfo.firstName} ${a.personalInfo.lastName}`
-        );
+        console.log(`Created application: ${a.personalInfo.firstName} ${a.personalInfo.lastName}`);
       } else {
-        console.log(
-          `Application for ${a.personalInfo.email} already exists. Skipping.`
-        );
+        console.log(`Application for ${a.personalInfo.email} already exists. Skipping.`);
       }
     }
 
