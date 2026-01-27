@@ -1,0 +1,1 @@
+export const SYS_USER = "System Admin";

@@ -7,6 +7,8 @@ export const DocumentLogSchema = z.object({
   type: z.string().min(1, "Type is required"), // e.g., 'Driver' | 'Vehicle' | 'Compliance'
   entityName: z.string().min(1, "Entity name is required"), // Driver Name or Bus Number
   user: z.string().min(1, "User is required"),
+  userRole: z.string().min(1, "User role is required").optional(),
+  fileUrl: z.string().optional(),
 });
 
 export type DocumentLog = z.infer<typeof DocumentLogSchema>;

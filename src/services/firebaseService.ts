@@ -51,6 +51,7 @@ if (!admin.apps.length) {
     admin.initializeApp({
       credential,
       projectId: env.FIREBASE_PROJECT_ID,
+      storageBucket: env.FIREBASE_STORAGE_BUCKET,
     });
     console.log("🔥 Firebase Admin initialized successfully 🔥\n");
   } catch (error) {
@@ -60,5 +61,11 @@ if (!admin.apps.length) {
 }
 
 export const db = admin.firestore();
+// NOTE: We intentionally ignore `undefined` properties when writing to Firestore.
+// This prevents runtime errors from optional/undefined fields in our TypeScript models
+// and normalizes writes by dropping those fields instead of storing them. Be aware that:
+// - Any field with value `undefined` will be silently omitted from writes.
+// - If you need to explicitly represent "no value", use `null` or omit the field.
+db.settings({ ignoreUndefinedProperties: true });
 export const auth = admin.auth();
 export const storage = admin.storage();
