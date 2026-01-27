@@ -1,3 +1,4 @@
+//src/plugins/swagger.ts
 import { FastifyInstance } from 'fastify';
 import fp from 'fastify-plugin';
 import swagger from '@fastify/swagger';
