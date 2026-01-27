@@ -7,7 +7,9 @@
     "start": "node dist/src/app.js",
     "seed": "ts-node -r tsconfig-paths/register src/scripts/seed.ts",
     "fix-admin": "ts-node -r tsconfig-paths/register src/scripts/fix-admin.ts",
+    "ensure-admin": "ts-node -r tsconfig-paths/register src/scripts/ensure-admin-user.ts",
     "cleardb": "ts-node -r tsconfig-paths/register src/scripts/clearDB.ts",
+    "setup:dev": "pnpm run ensure-admin && pnpm run seed",
     "token:get": "ts-node -r tsconfig-paths/register src/scripts/generateToken.ts",
     "test": "vitest run --dir src",
     "prepare": "husky"
@@ -20,6 +22,7 @@
     "node": "^20.19.0 || >=24.12.0"
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.2.0",
     "@types/node": "^25.0.3",
     "@vercel/node": "^5.5.16",
     "husky": "^9.1.7",
