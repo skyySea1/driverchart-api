@@ -182,9 +182,6 @@ export default async function (fastify: FastifyInstance) {
               file: url,
               ...(expiryDate ? { expiryDate } : {}),
             };
-          } else if (documentType === "ssnDoc") {
-            updateData.ssnDoc = url;
-            updateData.ssnDocName = filename;
           }
           await driverService.updateDriver(driverId, updateData);
           
@@ -457,10 +454,8 @@ export default async function (fastify: FastifyInstance) {
              uploadedAt: dayjs().toISOString()
            };
         }
-      } else if (documentType === "ssnDoc") {
-         updateData.ssnDoc = url;
-         updateData.ssnDocName = filename;
-      } else {
+      } 
+       else {
          // Generic fallback
          updateData[documentType] = { file: url, uploadedAt: dayjs().toISOString() };
       }

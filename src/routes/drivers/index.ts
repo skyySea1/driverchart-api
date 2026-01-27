@@ -115,7 +115,8 @@ export default async function (fastify: FastifyInstance) {
         return reply.status(204).send();
       }
 
-      await driverService.updateDriver(id, updates);
+      const userName = (request.user as any).name || (request.user as any).email || "System Audit";
+      await driverService.updateDriver(id, updates, userName);
 
       let logType: 'profile_update' | 'status_change' | 'creation' = 'profile_update';
       let logDescription = "";
