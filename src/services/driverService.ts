@@ -11,9 +11,17 @@ export const driverService = {
   async getAll(): Promise<Driver[]> {
     if (!COLLECTION_PATH) throw new Error("Invalid collection path");
     const snapshot = await db.collection(COLLECTION_PATH).get();
-    return snapshot.docs.map((doc) =>
-      DriverSchema.parse({ id: doc.id, ...doc.data() })
-    );
+
+    return snapshot.docs
+      .map((doc) => {
+        const result = DriverSchema.safeParse({ id: doc.id, ...doc.data() });
+        if (!result.success) {
+          console.warn(`[DriverService] Skipping invalid driver ${doc.id}:`, result.error.issues);
+          return null;
+        }
+        return result.data;
+      })
+      .filter((d): d is Driver => d !== null);
   },
 
   async getById(id: string): Promise<Driver | null> {
@@ -61,7 +69,12 @@ export const driverService = {
     return id;
   },
 
-  async updateDriver(id: string, data: Partial<Driver>): Promise<void> {
+  async updateDriver(
+    id: string,
+    data: Partial<Driver>,
+    userName?: string,
+    userRole?: string
+  ): Promise<void> {
     if (!id || !data) throw new Error("Invalid ID, or driver data");
 
     // Fetch current state to compare files
@@ -92,7 +105,8 @@ export const driverService = {
             fileName: cleanFileName,
             type: type,
             entityName: driverName,
-            user: "System Audit",
+            user: userName || "System",
+            userRole: userRole || "System role",
           });
         }
       };
@@ -119,7 +133,6 @@ export const driverService = {
           currentDoc.roadTest?.file,
           validatedData.roadTest?.file
         ),
-        logChange("SSN Card", currentDoc.ssnDoc, (validatedData as any).ssnDoc),
       ]);
     }
 
