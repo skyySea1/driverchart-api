@@ -163,7 +163,6 @@ export default async function (fastify: FastifyInstance) {
       const primaryAddress = app.addresses[0] || { street: "", city: "", state: "", zip: "" };
       const primaryLicense = app.licenses[0] || { number: "", state: "", expirationDate: "" };
 
-      // Create Driver with initial data
       const newDriverId = await driverService.createDriver({
         firstName: app.personalInfo.firstName,
         middleName: app.personalInfo.middleName,
@@ -178,6 +177,8 @@ export default async function (fastify: FastifyInstance) {
         zip: primaryAddress.zip,
         hireDate: dayjs().format("YYYY-MM-DD"),
         hireStatus: "Pending",
+        w9Signed: false,
+        isFlagged: false,
         
         license: {
           documentNumber: primaryLicense.number,
@@ -187,6 +188,8 @@ export default async function (fastify: FastifyInstance) {
         },
         medical: {
           expiryDate: app.personalInfo.medicalExpirationDate,
+          documentNumber: "",
+          registry: "",
           // File will be copied later
         },
         // Initialize others
@@ -234,7 +237,7 @@ export default async function (fastify: FastifyInstance) {
           companyTestingPolicyReceipt: false,
           drugAlcoholStatement: false,
         }
-      } as any); // Cast as any to avoid strict type checks on creation before full update? Or fix typing.
+      });
 
       // File Copy Logic
       const updates: Record<string, any> = {};
