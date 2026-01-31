@@ -2,7 +2,7 @@ import { db } from "./firebaseService";
 import { randomUUID } from "node:crypto";
 import dayjs from "dayjs";
 import { z } from "zod";
-import { env } from "@/utils/env";
+import { env } from "../utils/env";
 
 const COLLECTION_ID = env.COLLECTION_ID;
 const TOKENS_PATH = `artifacts/${COLLECTION_ID}/public/data/upload_tokens`;
