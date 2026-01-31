@@ -3,8 +3,8 @@ import { randomUUID } from "node:crypto";
 import dayjs from "dayjs";
 import { z } from "zod";
 
-const APP_ID = process.env.FIREBASE_APP_ID || "dot-compliance-app";
-const TOKENS_PATH = `artifacts/${APP_ID}/public/data/upload_tokens`;
+const COLLECTION_ID = process.env.COLLECTION_ID;
+const TOKENS_PATH = `artifacts/${COLLECTION_ID}/public/data/upload_tokens`;
 
 export const TokenMetadataSchema = z.object({
   id: z.string(),
@@ -17,9 +17,13 @@ export const TokenMetadataSchema = z.object({
 });
 
 export type TokenMetadata = z.infer<typeof TokenMetadataSchema>;
-
+// expiration upload email link tokens
 export const tokenService = {
-  async generateToken(driverId: string, documentType: string, expiresInHours = 48): Promise<string> {
+  async generateToken(
+    driverId: string,
+    documentType: string,
+    expiresInHours = 48
+  ): Promise<string> {
     const id = randomUUID();
     const now = dayjs();
     const expiresAt = now.add(expiresInHours, "hour").toISOString();
