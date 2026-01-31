@@ -2,15 +2,15 @@ import { db, auth } from "./firebaseService";
 import { UserSchema, type User } from "../schemas/usersSchema";
 import { env } from "../utils/env";
 
-const APP_ID = env.APP_ID;
-const COLLECTION_PATH = `artifacts/${APP_ID}/public/data/users`;
+const COLLECTION_ID = env.COLLECTION_ID;
+const COLLECTION_PATH = `artifacts/${COLLECTION_ID}/public/data/users`;
 
 export const userService = {
   async getAll(): Promise<User[]> {
     if (!COLLECTION_PATH) throw new Error("Invalid collection path");
     const snapshot = await db.collection(COLLECTION_PATH).get();
     const users: User[] = [];
-    snapshot.forEach(doc => {
+    snapshot.forEach((doc) => {
       try {
         users.push(UserSchema.parse({ id: doc.id, ...doc.data() }));
       } catch (e) {
@@ -20,7 +20,7 @@ export const userService = {
     return users;
   },
 
-async getCurrentUser(uid: string): Promise<User | null> {
+  async getCurrentUser(uid: string): Promise<User | null> {
     if (!uid) throw new Error("Invalid UID");
     const doc = await db.collection(COLLECTION_PATH).doc(uid).get();
     if (!doc.exists) return null;
@@ -68,43 +68,49 @@ async getCurrentUser(uid: string): Promise<User | null> {
     // 3. Create in Firestore (using Auth UID as ID)
     // Remove password from object before saving to DB
     const { password, ...userData } = validatedData;
-    
-    await db.collection(COLLECTION_PATH).doc(authUser.uid).set({
-      ...userData,
-      id: authUser.uid,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
+
+    await db
+      .collection(COLLECTION_PATH)
+      .doc(authUser.uid)
+      .set({
+        ...userData,
+        id: authUser.uid,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
 
     return authUser.uid;
   },
 
   async updateUser(id: string, data: Partial<User>): Promise<void> {
     if (!id) throw new Error("Invalid ID");
-    
+
     // Zod Partial Parse
     const validatedData = UserSchema.partial().parse(data);
     const { password, ...dbData } = validatedData;
 
     // 1. Update Auth (if sensitive data changed)
     if (password || dbData.email || dbData.name) {
-        await auth.updateUser(id, {
-            email: dbData.email,
-            password: password,
-            displayName: dbData.name
-        });
+      await auth.updateUser(id, {
+        email: dbData.email,
+        password: password,
+        displayName: dbData.name,
+      });
     }
 
     // 2. Update Role Claim (if changed)
     if (dbData.role) {
-        await auth.setCustomUserClaims(id, { role: dbData.role });
+      await auth.setCustomUserClaims(id, { role: dbData.role });
     }
 
     // 3. Update Firestore
-    await db.collection(COLLECTION_PATH).doc(id).update({
-      ...dbData,
-      updatedAt: new Date().toISOString(),
-    });
+    await db
+      .collection(COLLECTION_PATH)
+      .doc(id)
+      .update({
+        ...dbData,
+        updatedAt: new Date().toISOString(),
+      });
   },
 
   async deleteUser(id: string): Promise<void> {

@@ -1,29 +1,33 @@
-import { db } from '../services/firebaseService';
-import { env } from '../utils/env';
+import { db } from "../services/firebaseService";
+import { env } from "../utils/env";
 
-const APP_ID = env.APP_ID;
-const COLLECTION_PATH = `artifacts/${APP_ID}/public/data/users`;
+const COLLECTION_ID = env.COLLECTION_ID;
+const COLLECTION_PATH = `artifacts/${COLLECTION_ID}/public/data/users`;
 
 async function normalizeUsers() {
-  console.log('Normalizing collection:', COLLECTION_PATH);
+  console.log("Normalizing collection:", COLLECTION_PATH);
   const snapshot = await db.collection(COLLECTION_PATH).get();
-  
+
   if (snapshot.empty) {
-    console.log('No users found.');
+    console.log("No users found.");
     return;
   }
 
   const batch = db.batch();
   let count = 0;
 
-  snapshot.forEach(doc => {
+  snapshot.forEach((doc) => {
     const data = doc.data();
     const updates: any = {};
-    
+
     // Normalize Role
-    if (data.role && typeof data.role === 'string') {
+    if (data.role && typeof data.role === "string") {
       const lowerRole = data.role.toLowerCase();
-      if (['Admin', 'Manager', 'Dispatcher', 'Auditor', 'Viewer'].includes(data.role)) {
+      if (
+        ["Admin", "Manager", "Dispatcher", "Auditor", "Viewer"].includes(
+          data.role
+        )
+      ) {
         if (data.role !== lowerRole) {
           updates.role = lowerRole;
         }
@@ -46,7 +50,7 @@ async function normalizeUsers() {
     await batch.commit();
     console.log(`Successfully normalized ${count} users.`);
   } else {
-    console.log('No users needed normalization.');
+    console.log("No users needed normalization.");
   }
 }
 

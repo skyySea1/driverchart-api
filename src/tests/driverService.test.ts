@@ -23,7 +23,7 @@ vi.mock("../services/firebaseService", () => ({
       doc: mockDoc,
     })),
   },
-  env: { APP_ID: "test" },
+  env: { COLLECTION_ID: "test" },
 }));
 
 describe("driverService", () => {

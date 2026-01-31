@@ -4,8 +4,8 @@ import { env } from "../utils/env";
 import { documentService } from "./documentService";
 import dayjs from "dayjs";
 
-const APP_ID = env.APP_ID;
-const COLLECTION_PATH = `artifacts/${APP_ID}/public/data/drivers`;
+const COLLECTION_ID = env.COLLECTION_ID;
+const COLLECTION_PATH = `artifacts/${COLLECTION_ID}/public/data/drivers`;
 
 export const driverService = {
   async getAll(): Promise<Driver[]> {
@@ -16,7 +16,10 @@ export const driverService = {
       .map((doc) => {
         const result = DriverSchema.safeParse({ id: doc.id, ...doc.data() });
         if (!result.success) {
-          console.warn(`[DriverService] Skipping invalid driver ${doc.id}:`, result.error.issues);
+          console.warn(
+            `[DriverService] Skipping invalid driver ${doc.id}:`,
+            result.error.issues
+          );
           return null;
         }
         return result.data;

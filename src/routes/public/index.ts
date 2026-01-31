@@ -16,7 +16,7 @@ function sanitizeFilename(filename: string): string {
 const TYPE_MAP: Record<string, string> = {
   "5": "license",
   "6": "medical",
-  "7": "fcra"
+  "7": "fcra",
 };
 
 export default async function (fastify: FastifyInstance) {
@@ -42,7 +42,8 @@ export default async function (fastify: FastifyInstance) {
     async (request, reply) => {
       const { id } = request.params;
       const driver = await driverService.getById(id);
-      if (!driver) return reply.status(404).send({ message: "Driver not found" });
+      if (!driver)
+        return reply.status(404).send({ message: "Driver not found" });
 
       return {
         firstName: driver.firstName,
@@ -80,30 +81,38 @@ export default async function (fastify: FastifyInstance) {
       const { driverId, typeId } = fields;
 
       if (!fileBuffer || !driverId || !typeId) {
-        return reply.status(400).send({ message: "Missing file, driverId or typeId" });
+        return reply
+          .status(400)
+          .send({ message: "Missing file, driverId or typeId" });
       }
 
       const documentType = TYPE_MAP[typeId];
-      if (!documentType) return reply.status(400).send({ message: "Invalid type ID" });
+      if (!documentType)
+        return reply.status(400).send({ message: "Invalid type ID" });
 
       const driver = await driverService.getById(driverId);
-      if (!driver) return reply.status(404).send({ message: "Driver not found" });
+      if (!driver)
+        return reply.status(404).send({ message: "Driver not found" });
 
       const driverName = `${driver.firstName} ${driver.lastName}`;
-      const storagePath = `artifacts/${env.APP_ID}/public/drivers/${driverName}/${documentType}/${filename}`;
+      const storagePath = `artifacts/${env.COLLECTION_ID}/public/drivers/${driverName}/${documentType}/${filename}`;
 
-      const url = await documentService.uploadFile(Readable.from(fileBuffer), mimetype, storagePath);
+      const url = await documentService.uploadFile(
+        Readable.from(fileBuffer),
+        mimetype,
+        storagePath
+      );
 
       // Update driver record
       const updateData: Record<string, any> = {};
       if (["license", "medical", "fcra"].includes(documentType)) {
-         // for fcra we might want a different structure, but treating as doc for now
-         const currentDoc = (driver as any)[documentType] || {};
-         updateData[documentType] = {
-           ...currentDoc,
-           file: url,
-           uploadDate: dayjs().toISOString()
-         };
+        // for fcra we might want a different structure, but treating as doc for now
+        const currentDoc = (driver as any)[documentType] || {};
+        updateData[documentType] = {
+          ...currentDoc,
+          file: url,
+          uploadDate: dayjs().toISOString(),
+        };
       }
 
       await driverService.updateDriver(driverId, updateData);
@@ -112,7 +121,7 @@ export default async function (fastify: FastifyInstance) {
       await documentService.createAuditLog({
         entityId: driverId,
         entityName: driverName,
-        type: 'profile_update',
+        type: "profile_update",
         date: dayjs().toISOString(),
         user: "Public Magic Link",
         description: `Driver uploaded ${documentType} via magic link: ${filename}`,
