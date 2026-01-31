@@ -1,4 +1,5 @@
 import { db, storage } from "./firebaseService";
+import { env } from "../utils/env";
 import {
   DocumentLogSchema,
   type DocumentLog,
@@ -7,7 +8,7 @@ import { AuditLogSchema, type AuditLog } from "../schemas/auditSchema";
 import { pipeline } from "node:stream/promises";
 
 // data paths
-const COLLECTION_ID = process.env.COLLECTION_ID;
+const COLLECTION_ID = env.COLLECTION_ID;
 const DOCUMENT_LOGS_PATH = `artifacts/${COLLECTION_ID}/public/data/document_logs`;
 const AUDIT_LOGS_PATH = `artifacts/${COLLECTION_ID}/public/data/audit_logs`;
 const MEMOS_PATH = `artifacts/${COLLECTION_ID}/public/data/memos`;
