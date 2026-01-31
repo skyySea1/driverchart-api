@@ -45,7 +45,7 @@ export const DriverSchema = z.object({
 
   medical: z.object({
     documentNumber: z.string().default(""),
-    expiryDate: z.string().optional(),
+    expiryDate: z.string(" Medical Card Date is required").optional(),
     file: z.string().optional(),
     registry: z.string().optional().default(""),
   }),

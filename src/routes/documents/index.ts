@@ -6,7 +6,7 @@ import { documentService } from "../../services/documentService";
 import { driverService } from "../../services/driverService";
 import { emailService } from "../../services/emailService";
 import { tokenService } from "../../services/tokenService";
-import { env } from "../../utils/env";
+import { env } from '../../utils/env';
 import { z } from "zod";
 import dayjs from "dayjs";
 import { Readable } from "stream";
@@ -214,9 +214,6 @@ export default async function (fastify: FastifyInstance) {
         // Map document Types to ApplicationSchema fields
         if (documentType === "license") {
           updateData.licenseFront = url;
-          // Note: Simplification. Ideally we check licenseFront/Back but upload type is usually just 'license'
-          // The frontend should specify 'licenseFront' or 'licenseBack' as documentType if possible.
-          // If the documentType match schema fields exactly, we can use it directly.
         } else if (documentType === "medical") {
           updateData.medicalCard = url;
         } else {
@@ -262,7 +259,7 @@ export default async function (fastify: FastifyInstance) {
         description: "Send a document upload request email to a driver",
         tags: ["Documents"],
         body: z.object({
-          email: z.string().email(),
+          email: z.email(),
           driverName: z.string(),
           requestType: z.string(),
           magicLink: z.string(), // Kept for schema compatibility or if needed, but we regenerate secure link
@@ -290,7 +287,7 @@ export default async function (fastify: FastifyInstance) {
       if (driverId && docType) {
         const token = await tokenService.generateToken(driverId, docType);
         if (process.env.NODE_ENVIRONMENT === "production") {
-          const baseUrl = process.env.APP_URL;
+          const baseUrl = env.APP_URL;
           finalLink = `${baseUrl}/driver/upload/?token=${token}`;
         } else {
           finalLink = `http://localhost:5173/driver/upload/?token=${token}`;
@@ -353,7 +350,7 @@ export default async function (fastify: FastifyInstance) {
         description: "Send memos/policies to a driver via email",
         tags: ["Documents"],
         body: z.object({
-          email: z.string().email(),
+          email: z.email(),
           driverName: z.string(),
           memoTitle: z.string(),
           memoLinks: z.array(z.string()),
