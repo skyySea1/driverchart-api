@@ -6,8 +6,8 @@ import {
 import { env } from "../utils/env";
 import { logger } from "./logger-service";
 
-const APP_ID = env.APP_ID;
-const COLLECTION_PATH = `artifacts/${APP_ID}/public/data/applications`;
+const COLLECTION_ID = env.COLLECTION_ID;
+const COLLECTION_PATH = `artifacts/${COLLECTION_ID}/public/data/applications`;
 
 export const applicationService = {
   async getAll(): Promise<Application[]> {

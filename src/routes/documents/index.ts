@@ -148,15 +148,17 @@ export default async function (fastify: FastifyInstance) {
       // get path: Driver (documents) vs Applicant (applications)
       let storagePath = "";
       if (driverId) {
-        storagePath = `artifacts/${env.APP_ID}/public/documents/${
+        storagePath = `artifacts/${env.COLLECTION_ID}/public/documents/${
           entityName || driverId
         }/${documentType}/${filename}`;
       } else if (applicantName || applicationId) {
-        storagePath = `artifacts/${env.APP_ID}/public/applications/${applicantName || applicationId}/${documentType}/${filename}`;
+        storagePath = `artifacts/${env.COLLECTION_ID}/public/applications/${
+          applicantName || applicationId
+        }/${documentType}/${filename}`;
       } else {
-        return reply
-          .status(400)
-          .send({ message: "Missing driverId, applicationId or applicantName" });
+        return reply.status(400).send({
+          message: "Missing driverId, applicationId or applicantName",
+        });
       }
 
       const fileStream = Readable.from(fileBuffer);
@@ -184,45 +186,54 @@ export default async function (fastify: FastifyInstance) {
             };
           }
           await driverService.updateDriver(driverId, updateData);
-          
+
           // Log the profile update for the document link
           await documentService.createAuditLog({
             entityId: driverId,
-            entityName: entityName || (currentDriver as any).firstName + " " + (currentDriver as any).lastName,
-            type: 'profile_update',
+            entityName:
+              entityName ||
+              (currentDriver as any).firstName +
+                " " +
+                (currentDriver as any).lastName,
+            type: "profile_update",
             date: dayjs().toISOString(),
-            user: (request.user as any).name || (request.user as any).email || "Unknown User",
+            user:
+              (request.user as any).name ||
+              (request.user as any).email ||
+              "Unknown User",
             description: `Uploaded and linked ${documentType}: ${filename}`,
           });
         }
       } else if (applicationId) {
-         // Update Application Record
-         const { applicationService } = require("../../services/applicationService");
-         const updateData: Record<string, any> = {};
-         
-         // Map document Types to ApplicationSchema fields
-         if (documentType === 'license') {
-            updateData.licenseFront = url; 
-            // Note: Simplification. Ideally we check licenseFront/Back but upload type is usually just 'license'
-            // The frontend should specify 'licenseFront' or 'licenseBack' as documentType if possible.
-            // If the documentType match schema fields exactly, we can use it directly.
-         } else if (documentType === 'medical') {
-            updateData.medicalCard = url;
-         } else {
-            // Generic fallback or direct mapping if names match
-            updateData[documentType] = url;
-         }
+        // Update Application Record
+        const {
+          applicationService,
+        } = require("../../services/applicationService");
+        const updateData: Record<string, any> = {};
 
-         await applicationService.update(applicationId, updateData);
+        // Map document Types to ApplicationSchema fields
+        if (documentType === "license") {
+          updateData.licenseFront = url;
+          // Note: Simplification. Ideally we check licenseFront/Back but upload type is usually just 'license'
+          // The frontend should specify 'licenseFront' or 'licenseBack' as documentType if possible.
+          // If the documentType match schema fields exactly, we can use it directly.
+        } else if (documentType === "medical") {
+          updateData.medicalCard = url;
+        } else {
+          // Generic fallback or direct mapping if names match
+          updateData[documentType] = url;
+        }
 
-         await documentService.createAuditLog({
-            entityId: applicationId,
-            entityName: applicantName || "Applicant",
-            type: 'application_update',
-            date: dayjs().toISOString(),
-            user: (request.user as any).name || "System",
-            description: `Applicant Upload: ${documentType}`,
-         });
+        await applicationService.update(applicationId, updateData);
+
+        await documentService.createAuditLog({
+          entityId: applicationId,
+          entityName: applicantName || "Applicant",
+          type: "application_update",
+          date: dayjs().toISOString(),
+          user: (request.user as any).name || "System",
+          description: `Applicant Upload: ${documentType}`,
+        });
       }
 
       if (entityName || applicantName) {
@@ -231,7 +242,8 @@ export default async function (fastify: FastifyInstance) {
           fileName: filename,
           type: documentType,
           entityName: entityName || applicantName,
-          user: (request.user as any).name || (request.user as any).email || "User",
+          user:
+            (request.user as any).name || (request.user as any).email || "User",
           fileUrl: url,
         });
       }
@@ -256,20 +268,28 @@ export default async function (fastify: FastifyInstance) {
           magicLink: z.string(), // Kept for schema compatibility or if needed, but we regenerate secure link
           customMessage: z.string().optional(),
           driverId: z.string().optional(),
-          docType: z.string().optional()
+          docType: z.string().optional(),
         }),
       },
     },
     async (request, reply) => {
       console.log("DEBUG: request-upload body:", request.body);
-      const { email, driverName, requestType, magicLink, customMessage, driverId, docType } = request.body;
-      
+      const {
+        email,
+        driverName,
+        requestType,
+        magicLink,
+        customMessage,
+        driverId,
+        docType,
+      } = request.body;
+
       let finalLink = magicLink;
 
       // If we have context to generate a secure token, do it
       if (driverId && docType) {
         const token = await tokenService.generateToken(driverId, docType);
-        if (process.env.NODE_ENVIRONMENT ===  "production") {
+        if (process.env.NODE_ENVIRONMENT === "production") {
           const baseUrl = process.env.APP_URL;
           finalLink = `${baseUrl}/driver/upload/?token=${token}`;
         } else {
@@ -277,7 +297,13 @@ export default async function (fastify: FastifyInstance) {
         }
       }
 
-      await emailService.sendUploadRequest(email, driverName, requestType, finalLink, customMessage);
+      await emailService.sendUploadRequest(
+        email,
+        driverName,
+        requestType,
+        finalLink,
+        customMessage
+      );
       return { success: true };
     }
   );
@@ -290,10 +316,10 @@ export default async function (fastify: FastifyInstance) {
         tags: ["Documents"],
         response: {
           200: z.object({
-             valid: z.boolean(),
-             driverName: z.string().optional(),
-             documentType: z.string().optional(),
-             driverId: z.string().optional()
+            valid: z.boolean(),
+            driverName: z.string().optional(),
+            documentType: z.string().optional(),
+            driverId: z.string().optional(),
           }),
           400: z.object({ message: z.string() }), // Token invalid/expired
         },
@@ -304,15 +330,17 @@ export default async function (fastify: FastifyInstance) {
       try {
         const meta = await tokenService.validateToken(token);
         const driver = await driverService.getById(meta.driverId);
-        
-        return { 
-           valid: true, 
-           driverName: driver ? `${driver.firstName} ${driver.lastName}` : "Unknown Driver",
-           documentType: meta.documentType,
-           driverId: meta.driverId
+
+        return {
+          valid: true,
+          driverName: driver
+            ? `${driver.firstName} ${driver.lastName}`
+            : "Unknown Driver",
+          documentType: meta.documentType,
+          driverId: meta.driverId,
         };
       } catch (err) {
-         return reply.status(400).send({ message: (err as Error).message });
+        return reply.status(400).send({ message: (err as Error).message });
       }
     }
   );
@@ -381,13 +409,17 @@ export default async function (fastify: FastifyInstance) {
 
       if (!fileBuffer) return reply.status(400).send({ message: "No file" });
 
-      const storagePath = `artifacts/${env.APP_ID}/public/memos/${filename}`;
-      const url = await documentService.uploadFile(Readable.from(fileBuffer), mimetype, storagePath);
+      const storagePath = `artifacts/${env.COLLECTION_ID}/public/memos/${filename}`;
+      const url = await documentService.uploadFile(
+        Readable.from(fileBuffer),
+        mimetype,
+        storagePath
+      );
 
       await documentService.saveMemo({
         title: fields.title || filename,
         fileUrl: url,
-        type: fields.type || 'memo'
+        type: fields.type || "memo",
       });
 
       return { url, filename };
@@ -400,7 +432,7 @@ export default async function (fastify: FastifyInstance) {
       schema: {
         description: "Public secure upload using a valid token",
         tags: ["Documents"],
-        // No onRequest auth - handled by token validation
+        // handled by token validation
       },
     },
     async (request, reply) => {
@@ -420,7 +452,8 @@ export default async function (fastify: FastifyInstance) {
         }
       }
 
-      if (!fileBuffer) return reply.status(400).send({ message: "No file uploaded" });
+      if (!fileBuffer)
+        return reply.status(400).send({ message: "No file uploaded" });
 
       const { token } = fields;
       if (!token) return reply.status(400).send({ message: "Missing token" });
@@ -434,8 +467,12 @@ export default async function (fastify: FastifyInstance) {
       }
 
       // Upload File
-      const storagePath = `artifacts/${env.APP_ID}/public/documents/${meta.driverId}/${meta.documentType}/${filename}`;
-      const url = await documentService.uploadFile(Readable.from(fileBuffer), mimetype, storagePath);
+      const storagePath = `artifacts/${env.COLLECTION_ID}/public/documents/${meta.driverId}/${meta.documentType}/${filename}`;
+      const url = await documentService.uploadFile(
+        Readable.from(fileBuffer),
+        mimetype,
+        storagePath
+      );
 
       // Create/Update Driver Document Record
       const updateData: Record<string, any> = {};
@@ -447,29 +484,31 @@ export default async function (fastify: FastifyInstance) {
       ) {
         const currentDriver = await driverService.getById(meta.driverId);
         if (currentDriver) {
-           const currentDoc = (currentDriver as any)[documentType] || {};
-           updateData[documentType] = {
-             ...currentDoc,
-             file: url,
-             uploadedAt: dayjs().toISOString()
-           };
+          const currentDoc = (currentDriver as any)[documentType] || {};
+          updateData[documentType] = {
+            ...currentDoc,
+            file: url,
+            uploadedAt: dayjs().toISOString(),
+          };
         }
-      } 
-       else {
-         // Generic fallback
-         updateData[documentType] = { file: url, uploadedAt: dayjs().toISOString() };
+      } else {
+        // Generic fallback
+        updateData[documentType] = {
+          file: url,
+          uploadedAt: dayjs().toISOString(),
+        };
       }
 
       if (Object.keys(updateData).length > 0) {
         await driverService.updateDriver(meta.driverId, updateData);
-        
+
         await documentService.createAuditLog({
-            entityId: meta.driverId,
-            entityName: "Driver Upload",
-            type: 'profile_update',
-            date: dayjs().toISOString(),
-            user: "Driver (Token)",
-            description: `Public Upload: ${meta.documentType} - ${filename}`,
+          entityId: meta.driverId,
+          entityName: "Driver Upload",
+          type: "profile_update",
+          date: dayjs().toISOString(),
+          user: "Driver (Token)",
+          description: `Public Upload: ${meta.documentType} - ${filename}`,
         });
       }
 

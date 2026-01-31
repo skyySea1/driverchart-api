@@ -5,7 +5,7 @@ import { userService } from "../services/userService";
 import { db } from "../services/firebaseService";
 import { env } from "../utils/env";
 import dayjs from "dayjs";
-import { faker } from '@faker-js/faker';
+import { faker } from "@faker-js/faker";
 
 // Default Users
 const users: any[] = [
@@ -31,76 +31,121 @@ const users: any[] = [
 
 // Helper to generate random driver
 const generateDriver = (index: number) => {
-  const hireStatus = faker.helpers.arrayElement(['Active', 'Terminated', 'Pending', 'Rehired']);
-  const isActive = hireStatus === 'Active' || hireStatus === 'Rehired';
-  
+  const hireStatus = faker.helpers.arrayElement([
+    "Active",
+    "Terminated",
+    "Pending",
+    "Rehired",
+  ]);
+  const isActive = hireStatus === "Active" || hireStatus === "Rehired";
+
   return {
     firstName: faker.person.firstName(),
     middleName: faker.person.middleName(),
     lastName: faker.person.lastName(),
     email: faker.internet.email().toLowerCase(), // normalize email
     phone: faker.phone.number(),
-    dob: dayjs(faker.date.birthdate({ min: 21, max: 65, mode: 'age' })).format('YYYY-MM-DD'),
-    ssnNumber: faker.string.numeric(9).replace(/(\d{3})(\d{2})(\d{4})/, '$1-$2-$3'),
+    dob: dayjs(faker.date.birthdate({ min: 21, max: 65, mode: "age" })).format(
+      "YYYY-MM-DD"
+    ),
+    ssnNumber: faker.string
+      .numeric(9)
+      .replace(/(\d{3})(\d{2})(\d{4})/, "$1-$2-$3"),
     address: faker.location.streetAddress(),
     city: faker.location.city(),
     state: faker.location.state({ abbreviated: true }),
     zip: faker.location.zipCode(),
-    hireDate: dayjs(faker.date.past({ years: 3 })).format('YYYY-MM-DD'),
+    hireDate: dayjs(faker.date.past({ years: 3 })).format("YYYY-MM-DD"),
     hireStatus,
     license: {
       documentNumber: faker.string.alphanumeric(9).toUpperCase(),
       state: faker.location.state({ abbreviated: true }),
-      expiryDate: isActive ? dayjs().add(faker.number.int({ min: 1, max: 24 }), 'month').format('YYYY-MM-DD') : dayjs().subtract(faker.number.int({ min: 1, max: 12 }), 'month').format('YYYY-MM-DD'),
-      file: Math.random() > 0.3 ? `https://example.com/license-${index}.pdf` : undefined,
+      expiryDate: isActive
+        ? dayjs()
+            .add(faker.number.int({ min: 1, max: 24 }), "month")
+            .format("YYYY-MM-DD")
+        : dayjs()
+            .subtract(faker.number.int({ min: 1, max: 12 }), "month")
+            .format("YYYY-MM-DD"),
+      file:
+        Math.random() > 0.3
+          ? `https://example.com/license-${index}.pdf`
+          : undefined,
     },
     medical: {
       documentNumber: faker.string.alphanumeric(10).toUpperCase(),
       registry: faker.string.numeric(10),
-      expiryDate: isActive ? dayjs().add(faker.number.int({ min: 1, max: 12 }), 'month').format('YYYY-MM-DD') : dayjs().subtract(faker.number.int({ min: 1, max: 6 }), 'month').format('YYYY-MM-DD'),
-       file: Math.random() > 0.4 ? `https://example.com/medical-${index}.pdf` : undefined,
+      expiryDate: isActive
+        ? dayjs()
+            .add(faker.number.int({ min: 1, max: 12 }), "month")
+            .format("YYYY-MM-DD")
+        : dayjs()
+            .subtract(faker.number.int({ min: 1, max: 6 }), "month")
+            .format("YYYY-MM-DD"),
+      file:
+        Math.random() > 0.4
+          ? `https://example.com/medical-${index}.pdf`
+          : undefined,
     },
     mvr: {
       documentNumber: `MVR-${dayjs().year()}-${index}`,
-      expiryDate: dayjs().add(faker.number.int({ min: 3, max: 12 }), 'month').format('YYYY-MM-DD'),
-      file: Math.random() > 0.5 ? `https://example.com/mvr-${index}.pdf` : undefined,
+      expiryDate: dayjs()
+        .add(faker.number.int({ min: 3, max: 12 }), "month")
+        .format("YYYY-MM-DD"),
+      file:
+        Math.random() > 0.5
+          ? `https://example.com/mvr-${index}.pdf`
+          : undefined,
     },
     drugAlcohol: {
       documentNumber: `DA-${dayjs().year()}-${index}`,
-      expiryDate: dayjs().add(faker.number.int({ min: 6, max: 12 }), 'month').format('YYYY-MM-DD'),
-      file: Math.random() > 0.5 ? `https://example.com/drug-${index}.pdf` : undefined,
+      expiryDate: dayjs()
+        .add(faker.number.int({ min: 6, max: 12 }), "month")
+        .format("YYYY-MM-DD"),
+      file:
+        Math.random() > 0.5
+          ? `https://example.com/drug-${index}.pdf`
+          : undefined,
     },
     roadTest: {
       documentNumber: `RT-${dayjs().year()}-${index}`,
       examiner: faker.person.fullName(),
-      date: dayjs(faker.date.past({ years: 1 })).format('YYYY-MM-DD'),
-      expiryDate: dayjs().add(2, 'year').format('YYYY-MM-DD'),
-      file: Math.random() > 0.6 ? `https://example.com/roadtest-${index}.pdf` : undefined,
+      date: dayjs(faker.date.past({ years: 1 })).format("YYYY-MM-DD"),
+      expiryDate: dayjs().add(2, "year").format("YYYY-MM-DD"),
+      file:
+        Math.random() > 0.6
+          ? `https://example.com/roadtest-${index}.pdf`
+          : undefined,
     },
     emergencyContact: {
       name: faker.person.fullName(),
       phone: faker.phone.number(),
-      relationship: faker.helpers.arrayElement(['Spouse', 'Parent', 'Sibling', 'Friend']),
+      relationship: faker.helpers.arrayElement([
+        "Spouse",
+        "Parent",
+        "Sibling",
+        "Friend",
+      ]),
     },
     isFlagged: Math.random() > 0.9,
     flagReason: Math.random() > 0.9 ? "Pending safety review" : "",
-    
+
     // New fields
     w9Signed: faker.datatype.boolean(),
     drugTestSignature: faker.person.fullName(),
-    drugTestDate: dayjs(faker.date.past()).format('YYYY-MM-DD'),
+    drugTestDate: dayjs(faker.date.past()).format("YYYY-MM-DD"),
     authReleaseSignature: faker.person.fullName(),
-    authReleaseDate: dayjs(faker.date.past()).format('YYYY-MM-DD'),
+    authReleaseDate: dayjs(faker.date.past()).format("YYYY-MM-DD"),
     pspDisclosureSignature: faker.person.fullName(),
-    pspDisclosureDate: dayjs(faker.date.past()).format('YYYY-MM-DD'),
+    pspDisclosureDate: dayjs(faker.date.past()).format("YYYY-MM-DD"),
     fmcsaConsentSignature: faker.person.fullName(),
-    fmcsaConsentDate: dayjs(faker.date.past()).format('YYYY-MM-DD'),
+    fmcsaConsentDate: dayjs(faker.date.past()).format("YYYY-MM-DD"),
     alcoholDrugPolicySignature: faker.person.fullName(),
-    alcoholDrugPolicyDate: dayjs(faker.date.past()).format('YYYY-MM-DD'),
+    alcoholDrugPolicyDate: dayjs(faker.date.past()).format("YYYY-MM-DD"),
     generalWorkPolicySignature: faker.person.fullName(),
-    generalWorkPolicyDate: dayjs(faker.date.past()).format('YYYY-MM-DD'),
+    generalWorkPolicyDate: dayjs(faker.date.past()).format("YYYY-MM-DD"),
     fairCreditReportingSignature: faker.person.fullName(),
-    fairCreditReportingDate: dayjs(faker.date.past()).format('YYYY-MM-DD'),
+    fairCreditReportingDate: dayjs(faker.date.past()).format("YYYY-MM-DD"),
   };
 };
 
@@ -120,35 +165,44 @@ const vehicles: any[] = [
     mileage: 22000,
   },
   {
-      busNumber: "103",
-      vin: "3HGCM82633A001122",
-      vehicleStatus: "Active",
-      lastAnnualInspection: dayjs().subtract(1, "month").format("YYYY-MM-DD"),
-      mileage: 5000,
+    busNumber: "103",
+    vin: "3HGCM82633A001122",
+    vehicleStatus: "Active",
+    lastAnnualInspection: dayjs().subtract(1, "month").format("YYYY-MM-DD"),
+    mileage: 5000,
   },
-   {
-      busNumber: "201",
-      vin: "4HGCM82633A003344",
-      vehicleStatus: "Inactive",
-      lastAnnualInspection: dayjs().subtract(24, "month").format("YYYY-MM-DD"),
-      mileage: 150000,
-  }
+  {
+    busNumber: "201",
+    vin: "4HGCM82633A003344",
+    vehicleStatus: "Inactive",
+    lastAnnualInspection: dayjs().subtract(24, "month").format("YYYY-MM-DD"),
+    mileage: 150000,
+  },
 ];
 
 const generateApplication = () => {
-   const status = faker.helpers.arrayElement(['New', 'Pending', 'Hired', 'Rejected']);
-   
-   return {
+  const status = faker.helpers.arrayElement([
+    "New",
+    "Pending",
+    "Hired",
+    "Rejected",
+  ]);
+
+  return {
     status: status as "New" | "Pending" | "Hired" | "Rejected",
     appliedDate: dayjs(faker.date.recent({ days: 60 })).format("YYYY-MM-DD"),
     personalInfo: {
       firstName: faker.person.firstName(),
       middleName: faker.person.middleName(),
       lastName: faker.person.lastName(),
-      dob: dayjs(faker.date.birthdate({ min: 21, max: 60, mode: 'age' })).format('YYYY-MM-DD'),
+      dob: dayjs(
+        faker.date.birthdate({ min: 21, max: 60, mode: "age" })
+      ).format("YYYY-MM-DD"),
       email: faker.internet.email().toLowerCase(),
       phone: faker.phone.number(),
-      ssnNumber: faker.string.numeric(9).replace(/(\d{3})(\d{2})(\d{4})/, '$1-$2-$3'),
+      ssnNumber: faker.string
+        .numeric(9)
+        .replace(/(\d{3})(\d{2})(\d{4})/, "$1-$2-$3"),
       medicalExpirationDate: dayjs().add(1, "year").format("YYYY-MM-DD"),
     },
     addresses: [
@@ -165,9 +219,9 @@ const generateApplication = () => {
       {
         number: faker.string.alphanumeric(9).toUpperCase(),
         state: faker.location.state({ abbreviated: true }),
-        class: faker.helpers.arrayElement(['A', 'B', 'C']),
+        class: faker.helpers.arrayElement(["A", "B", "C"]),
         expirationDate: dayjs().add(2, "year").format("YYYY-MM-DD"),
-        endorsements: faker.helpers.arrayElement(['P', 'S', 'N', '']),
+        endorsements: faker.helpers.arrayElement(["P", "S", "N", ""]),
         restrictions: "",
       },
     ],
@@ -175,8 +229,8 @@ const generateApplication = () => {
     accidents: [],
     violations: [],
     vehicleExperience: [],
-    notes: status === 'Rejected' ? "Does not meet experience requirements" : "",
-    
+    notes: status === "Rejected" ? "Does not meet experience requirements" : "",
+
     // New fields
     forfeitures: "",
     deniedLicense: false,
@@ -198,15 +252,15 @@ const generateApplication = () => {
     generalWorkPolicyDate: "",
     fairCreditReportingSignature: "",
     fairCreditReportingDate: "",
-    
+
     isFlagged: false,
     flagReason: "",
     flagDate: "",
   };
-}
+};
 
 async function seed() {
-  console.log(`Seeding data for APP_ID: ${env.APP_ID}...`);
+  console.log(`Seeding data for COLLECTION_ID: ${env.COLLECTION_ID}...`);
 
   try {
     // 1. Seed Users (and Auth)
@@ -216,25 +270,29 @@ async function seed() {
 
       if (existingInFirestore && existingInFirestore.id) {
         console.log(`User ${u.email} exists in Firestore. updating role...`);
-         try {
-          await userService.updateUser(existingInFirestore.id, { role: u.role });
+        try {
+          await userService.updateUser(existingInFirestore.id, {
+            role: u.role,
+          });
         } catch (e: any) {
-           console.log(`Error updating user ${u.email}: ${e.message}`);
+          console.log(`Error updating user ${u.email}: ${e.message}`);
         }
       } else {
         try {
           await userService.createUser(u);
           console.log(`Created new user: ${u.email} (${u.role})`);
         } catch (err: any) {
-             console.log(`Error creating user ${u.email}: ${err.message}`);
+          console.log(`Error creating user ${u.email}: ${err.message}`);
         }
       }
     }
 
     // 2. Seed Drivers (Generate 20)
     console.log("Seeding Drivers...");
-    const driversToSeed = Array.from({ length: 20 }, (_, i) => generateDriver(i));
-    
+    const driversToSeed = Array.from({ length: 20 }, (_, i) =>
+      generateDriver(i)
+    );
+
     for (const d of driversToSeed) {
       const existing = await driverService.getAll();
       const exists = existing.some((ed) => ed.email === d.email);
@@ -251,7 +309,9 @@ async function seed() {
     console.log("Seeding Vehicles...");
     for (const v of vehicles) {
       const existingVehicles = await vehicleService.getAll();
-      const exists = existingVehicles.some((ev) => ev.busNumber === v.busNumber);
+      const exists = existingVehicles.some(
+        (ev) => ev.busNumber === v.busNumber
+      );
 
       if (!exists) {
         await vehicleService.createVehicle(v);
@@ -264,16 +324,22 @@ async function seed() {
     // 4. Seed Applications (Generate 20)
     console.log("Seeding Applications...");
     const appsToSeed = Array.from({ length: 20 }, () => generateApplication());
-    
+
     for (const a of appsToSeed) {
       const existingApps = await applicationService.getAll();
-      const exists = existingApps.some((ea) => ea.personalInfo.email === a.personalInfo.email);
+      const exists = existingApps.some(
+        (ea) => ea.personalInfo.email === a.personalInfo.email
+      );
 
       if (!exists) {
         await applicationService.create(a);
-        console.log(`Created application: ${a.personalInfo.firstName} ${a.personalInfo.lastName}`);
+        console.log(
+          `Created application: ${a.personalInfo.firstName} ${a.personalInfo.lastName}`
+        );
       } else {
-        console.log(`Application for ${a.personalInfo.email} already exists. Skipping.`);
+        console.log(
+          `Application for ${a.personalInfo.email} already exists. Skipping.`
+        );
       }
     }
 

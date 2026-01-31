@@ -3,8 +3,8 @@ import { env } from "../utils/env";
 
 const TARGET_EMAIL = "henrir1020@gmail.com";
 const TARGET_ROLE = "Admin";
-const APP_ID = env.APP_ID;
-const USERS_COLLECTION = `artifacts/${APP_ID}/public/data/users`;
+const COLLECTION_ID = env.COLLECTION_ID;
+const USERS_COLLECTION = `artifacts/${COLLECTION_ID}/public/data/users`;
 
 async function fixAdmin() {
   console.log(`\n--- Fixing Admin Role for ${TARGET_EMAIL} ---\n`);
@@ -30,30 +30,34 @@ async function fixAdmin() {
       id: uid,
       email: TARGET_EMAIL,
       name: userRecord.displayName || "Admin",
-      firstName: (userRecord.displayName || "Admin").split(' ')[0],
-      lastName: (userRecord.displayName || "Admin").split(' ').slice(1).join(' ') || "User",
+      firstName: (userRecord.displayName || "Admin").split(" ")[0],
+      lastName:
+        (userRecord.displayName || "Admin").split(" ").slice(1).join(" ") ||
+        "User",
       role: TARGET_ROLE,
       isActive: true,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
 
     if (!doc.exists) {
       console.log(`Document does not exist. Creating new...`);
       await userRef.set({
         ...userData,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       });
     } else {
       console.log(`Document exists. Updating role...`);
       await userRef.update({
         role: TARGET_ROLE,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       });
     }
 
     console.log(`\n✅ Successfully promoted ${TARGET_EMAIL} to Admin!`);
-    console.log(`Please sign out and sign back in on the web app to refresh your token.\n`);
-    
+    console.log(
+      `Please sign out and sign back in on the web app to refresh your token.\n`
+    );
+
     process.exit(0);
   } catch (error: any) {
     console.error(`\n❌ Error fixing Admin:`, error.message);

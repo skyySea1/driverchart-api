@@ -144,24 +144,41 @@ export default async function (fastify: FastifyInstance) {
         return reply.status(404).send({ message: "Application not found" });
 
       // Check duplicates
-      const allDrivers = await import("../../services/driverService").then(m => m.driverService.getAll());
+      const allDrivers = await import("../../services/driverService").then(
+        (m) => m.driverService.getAll()
+      );
       const isDuplicate = allDrivers.some(
-        (d) => d.ssnNumber === app.personalInfo.ssnNumber || d.email === app.personalInfo.email
+        (d) =>
+          d.ssnNumber === app.personalInfo.ssnNumber ||
+          d.email === app.personalInfo.email
       );
 
       if (isDuplicate) {
-        return reply.status(400).send({ message: "Driver with this SSN or Email already exists." });
+        return reply
+          .status(400)
+          .send({ message: "Driver with this SSN or Email already exists." });
       }
 
       // Map Application to Driver
       // Basic mapping
       const { driverService } = await import("../../services/driverService");
-      const { documentService } = await import("../../services/documentService"); 
+      const { documentService } = await import(
+        "../../services/documentService"
+      );
       const dayjs = (await import("dayjs")).default;
       const { env } = await import("../../utils/env");
 
-      const primaryAddress = app.addresses[0] || { street: "", city: "", state: "", zip: "" };
-      const primaryLicense = app.licenses[0] || { number: "", state: "", expirationDate: "" };
+      const primaryAddress = app.addresses[0] || {
+        street: "",
+        city: "",
+        state: "",
+        zip: "",
+      };
+      const primaryLicense = app.licenses[0] || {
+        number: "",
+        state: "",
+        expirationDate: "",
+      };
 
       const newDriverId = await driverService.createDriver({
         firstName: app.personalInfo.firstName,
@@ -179,7 +196,7 @@ export default async function (fastify: FastifyInstance) {
         hireStatus: "Pending",
         w9Signed: false,
         isFlagged: false,
-        
+
         license: {
           documentNumber: primaryLicense.number,
           state: primaryLicense.state,
@@ -197,11 +214,11 @@ export default async function (fastify: FastifyInstance) {
         drugAlcohol: { documentNumber: "" },
         roadTest: { documentNumber: "", examiner: "" },
         emergencyContact: { name: "", phone: "", relationship: "" },
-        
+
         // App Reference
         applicationId: app.id,
         appliedDate: app.appliedDate || app.createdAt,
-        
+
         // Signatures
         drugTestSignature: app.drugTestSignature,
         drugTestDate: app.drugTestDate,
@@ -222,7 +239,7 @@ export default async function (fastify: FastifyInstance) {
         qualificationChecklist: {
           dotApplication: true,
           completedAt: {
-             dotApplication: dayjs().toISOString(),
+            dotApplication: dayjs().toISOString(),
           },
           drivingRecordInquiry: false,
           goodFaithEffort: false,
@@ -236,7 +253,7 @@ export default async function (fastify: FastifyInstance) {
           randomProgramPlacement: false,
           companyTestingPolicyReceipt: false,
           drugAlcoholStatement: false,
-        }
+        },
       });
 
       // File Copy Logic
@@ -246,36 +263,36 @@ export default async function (fastify: FastifyInstance) {
         const sourcePath = documentService.getStoragePathFromUrl(url);
         if (!sourcePath) return url; // Keep original if fail to extract (maybe it's external?)
 
-        // Construct destination path: artifacts/APP_ID/public/documents/DRIVER_ID/TYPE/FILENAME
+        // Construct destination path: artifacts/COLLECTION_ID/public/documents/DRIVER_ID/TYPE/FILENAME
         const filename = sourcePath.split("/").pop() || "doc";
-        const destPath = `artifacts/${env.APP_ID}/public/documents/${newDriverId}/${type}/${filename}`;
+        const destPath = `artifacts/${env.COLLECTION_ID}/public/documents/${newDriverId}/${type}/${filename}`;
 
         try {
-           const newUrl = await documentService.copyFile(sourcePath, destPath);
-           return newUrl;
+          const newUrl = await documentService.copyFile(sourcePath, destPath);
+          return newUrl;
         } catch (e) {
-           console.error(`Failed to copy file for ${type}:`, e);
-           return url; // Fallback to original
+          console.error(`Failed to copy file for ${type}:`, e);
+          return url; // Fallback to original
         }
       };
 
       // Perform Copies
       if (app.licenseFront) {
-         const newUrl = await copy(app.licenseFront, "license");
-         updates.license = { 
-           documentNumber: primaryLicense.number,
-           state: primaryLicense.state,
-           expiryDate: primaryLicense.expirationDate,
-           file: newUrl 
-         };
+        const newUrl = await copy(app.licenseFront, "license");
+        updates.license = {
+          documentNumber: primaryLicense.number,
+          state: primaryLicense.state,
+          expiryDate: primaryLicense.expirationDate,
+          file: newUrl,
+        };
       }
-      
+
       if (app.medicalCard) {
-         const newUrl = await copy(app.medicalCard, "medical");
-         updates.medical = {
-            expiryDate: app.personalInfo.medicalExpirationDate,
-            file: newUrl
-         };
+        const newUrl = await copy(app.medicalCard, "medical");
+        updates.medical = {
+          expiryDate: app.personalInfo.medicalExpirationDate,
+          file: newUrl,
+        };
       }
 
       // Update Driver if we copied files
