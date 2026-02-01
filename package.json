@@ -10,7 +10,6 @@
     "ensure-admin": "ts-node -r tsconfig-paths/register src/scripts/ensure-admin-user.ts",
     "cleardb": "ts-node -r tsconfig-paths/register src/scripts/clearDB.ts",
     "setup:dev": "pnpm run ensure-admin && pnpm run seed",
-    "token:get": "ts-node -r tsconfig-paths/register src/scripts/generateToken.ts",
     "test": "vitest run --dir src",
     "prepare": "husky"
   },
