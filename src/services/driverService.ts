@@ -80,72 +80,78 @@ export const driverService = {
   ): Promise<void> {
     if (!id || !data) throw new Error("Invalid ID, or driver data");
 
-    // Fetch current state to compare files
-    const currentDoc = await this.getById(id);
     const validatedData = DriverSchema.partial().parse(data);
+    const driverRef = db.collection(COLLECTION_PATH).doc(id);
+    const APP_COLLECTION_PATH = `artifacts/${env.COLLECTION_ID}/public/data/applications`;
 
-    if (currentDoc) {
-      const driverName = `${currentDoc.firstName} ${currentDoc.lastName}`;
-      const logChange = async (
-        type: string,
-        oldFile?: string | null,
-        newFile?: string | null
-      ) => {
-        if (newFile && newFile !== oldFile) {
-          // Extrair nome limpo do arquivo decodificando a URL e pegando a última parte
-          let cleanFileName = "document";
-          try {
-            const decoded = decodeURIComponent(newFile);
-            cleanFileName = decoded.split("/").pop() || "document";
-            // Remover parâmetros de query se houver (ex: ?alt=media)
-            cleanFileName = cleanFileName.split("?")[0];
-          } catch (e) {
-            cleanFileName = newFile.split("/").pop() || "document";
-          }
+    // 1. Fetch current state outside transaction for comparison logic 
+    // (or we can do it inside, but we must be careful with side effects)
+    const currentDoc = await this.getById(id);
+    if (!currentDoc) throw new Error("Driver not found");
 
-          await documentService.createLog({
-            date: dayjs().toISOString(),
-            fileName: cleanFileName,
-            type: type,
-            entityName: driverName,
-            user: userName || "System",
-            userRole: userRole || "System role",
-          });
-        }
-      };
+    const driverName = `${currentDoc.firstName} ${currentDoc.lastName}`;
 
-      await Promise.all([
-        logChange(
-          "License",
-          currentDoc.license?.file,
-          validatedData.license?.file
-        ),
-        logChange(
-          "Medical Certificate",
-          currentDoc.medical?.file,
-          validatedData.medical?.file
-        ),
-        logChange("MVR Report", currentDoc.mvr?.file, validatedData.mvr?.file),
-        logChange(
-          "Drug & Alcohol",
-          currentDoc.drugAlcohol?.file,
-          validatedData.drugAlcohol?.file
-        ),
-        logChange(
-          "Road Test",
-          currentDoc.roadTest?.file,
-          validatedData.roadTest?.file
-        ),
-      ]);
-    }
+    // 2. Execute Transaction for atomic updates
+    await db.runTransaction(async (transaction) => {
+      // Re-read inside transaction to ensure consistency
+      const tDoc = await transaction.get(driverRef);
+      if (!tDoc.exists) throw new Error("Driver not found");
+      const tData = tDoc.data() as Driver;
 
-    await db
-      .collection(COLLECTION_PATH)
-      .doc(id)
-      .update({
+      // Sync with Application if status changed to 'Active'
+      if (
+        validatedData.hireStatus === "Active" &&
+        tData.hireStatus !== "Active" &&
+        tData.applicationId
+      ) {
+        const appRef = db.collection(APP_COLLECTION_PATH).doc(tData.applicationId);
+        transaction.update(appRef, {
+          status: "Hired",
+          updatedAt: new Date().toISOString(),
+        });
+      }
+
+      // Update Driver
+      transaction.update(driverRef, {
         ...validatedData,
         updatedAt: new Date().toISOString(),
       });
+    });
+
+    // 3. Side Effects (Logging) - Executed AFTER successful transaction commit
+    const logChange = async (
+      type: string,
+      oldFile?: string | null,
+      newFile?: string | null
+    ) => {
+      if (newFile && newFile !== oldFile) {
+        let cleanFileName = "document";
+        try {
+          const decoded = decodeURIComponent(newFile);
+          cleanFileName = decoded.split("/").pop() || "document";
+          cleanFileName = cleanFileName.split("?")[0];
+        } catch (e) {
+          cleanFileName = newFile.split("/").pop() || "document";
+        }
+
+        await documentService.createLog({
+          date: dayjs().toISOString(),
+          fileName: cleanFileName,
+          type: type,
+          entityName: driverName,
+          user: userName || "System",
+          userRole: userRole || "System role",
+        });
+      }
+    };
+
+    await Promise.all([
+      logChange("License", currentDoc.license?.file, validatedData.license?.file),
+      logChange("Medical Certificate", currentDoc.medical?.file, validatedData.medical?.file),
+      logChange("MVR Report", currentDoc.mvr?.file, validatedData.mvr?.file),
+      logChange("Drug & Alcohol", currentDoc.drugAlcohol?.file, validatedData.drugAlcohol?.file),
+      logChange("Road Test", currentDoc.roadTest?.file, validatedData.roadTest?.file),
+    ]);
   },
 
   async delete(id: string): Promise<void> {

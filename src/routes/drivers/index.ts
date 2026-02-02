@@ -104,7 +104,7 @@ export default async function (fastify: FastifyInstance) {
       const updates = request.body;
       const changedFields: string[] = [];
       
-      // Basic change detection
+      // Basic change detection for auditing
       for (const key in updates) {
         if (updates[key as keyof typeof updates] !== (previousDriver as any)[key]) {
           changedFields.push(key);
@@ -123,7 +123,7 @@ export default async function (fastify: FastifyInstance) {
 
       if (changedFields.includes('hireStatus')) {
         logType = 'status_change';
-        logDescription = `Status changed from ${(previousDriver as any).hireStatus || 'N/A'} to ${updates.hireStatus}. `;
+        logDescription = `Status changed from ${previousDriver.hireStatus || 'N/A'} to ${updates.hireStatus}. `;
         const otherFields = changedFields.filter(f => f !== 'hireStatus');
         if (otherFields.length > 0) {
           logDescription += `Also updated: ${otherFields.join(', ')}`;
@@ -134,7 +134,7 @@ export default async function (fastify: FastifyInstance) {
       
       await documentService.createAuditLog({
         entityId: id,
-        entityName: (previousDriver as any).firstName + " " + (previousDriver as any).lastName,
+        entityName: previousDriver.firstName + " " + previousDriver.lastName,
         type: logType,
         date: dayjs().toISOString(),
         user: (request.user as any).name || (request.user as any).email || "System",

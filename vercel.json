@@ -5,7 +5,7 @@
   "redirects": [
     {
       "source": "/",
-      "destination": "/info",
+      "destination": "/api/health",
       "permanent": false
     }
   ],
