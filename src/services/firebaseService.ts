@@ -61,11 +61,10 @@ if (!admin.apps.length) {
 }
 
 export const db = admin.firestore();
-// NOTE: We intentionally ignore `undefined` properties when writing to Firestore.
-// This prevents runtime errors from optional/undefined fields in our TypeScript models
-// and normalizes writes by dropping those fields instead of storing them. Be aware that:
-// - Any field with value `undefined` will be silently omitted from writes.
-// - If you need to explicitly represent "no value", use `null` or omit the field.
+// NOTE: intentionally ignores `undefined` properties when writing to Firestore.
+// This prevents runtime errors from optional/undefined fields in TypeScript models
+// and normalizes writes by dropping those fields instead of storing them.
+// Any field with value `undefined` will be silently omitted from writes.
 db.settings({ ignoreUndefinedProperties: true });
 export const auth = admin.auth();
 export const storage = admin.storage();
