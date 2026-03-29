@@ -6,7 +6,13 @@ dotenv.config();
 export const envSchema = z.object({
   PORT: z.string().default("3000"),
   JWT_SECRET: z.string(),
-  APP_URL: z.url().default("https://chartersafe-90b36.web.app"),
+  APP_URL: z.url(),
+  CORS_ORIGINS: z
+    .string()
+    .optional()
+    .transform((val) =>
+      val ? val.split(",").map((origin) => origin.trim()) : []
+    ), // Comma-separated list of allowed origins
   NODE_ENVIRONMENT: z
     .enum(["development", "production", "preview", "test"])
     .default("development"),
